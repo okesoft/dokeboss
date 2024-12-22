@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "incremental": true,
+        "target": "es2020",
+        "module": "Node16",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./build",
+        "preserveConstEnums": true,
+        "inlineSourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "experimentalDecorators": true
+    },
+    "include": [
+        "src/**/*",
+        "index.js"
+ ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts",
+        "test"
+    ]
+}

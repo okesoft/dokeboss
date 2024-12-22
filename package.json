@@ -1,0 +1,30 @@
+{
+  "name": "dokeboss",
+  "version": "1.0.0",
+  "description": "convert and preview of any types of document",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest ./tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gettocat/dokeboss.git"
+  },
+  "keywords": [
+    "document",
+    "preview",
+    "convert"
+  ],
+  "author": "gettocat",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gettocat/dokeboss/issues"
+  },
+  "homepage": "https://github.com/gettocat/dokeboss#readme",
+  "dependencies": {
+    "await-spawn": "^4.0.2"
+  }
+}
