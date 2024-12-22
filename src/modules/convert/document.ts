@@ -1,4 +1,4 @@
-import dokeBossModule from "../../module";
+import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
 
 export default class dokeBossDocumentConvertModule extends dokeBossModule {
 
@@ -6,9 +6,14 @@ export default class dokeBossDocumentConvertModule extends dokeBossModule {
         super('document-convert', 'convert', parent);
     }
 
-    async convert(options: any, mimeType: string): Promise<Buffer> {
-        console.log('convert document');
-        return Buffer.from('');
+    async convert(options: any, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
+        return async (inputFile, outputFile) => {
+            return {
+                command: 'unoconvert',
+                args: ['--host-location', 'remote', inputFile, outputFile],
+                timeout: 120000
+            }
+        }
     }
 
 }

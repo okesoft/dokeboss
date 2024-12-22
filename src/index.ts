@@ -2,6 +2,7 @@ import { tmpdir } from 'os';
 import fs from 'fs';
 import { join } from 'node:path';
 import db from './db';
+import axios from 'axios';
 import dokeBossBase, { dokeBossModuleList } from './base';
 
 export type dokeBossMode = 'preview' | 'convert' | 'crop';
@@ -20,6 +21,7 @@ export type dokeBossOptions = {
 export default class dokeBoss extends dokeBossBase {
     protected session: string = '';
     protected inputTemp: boolean = false;
+    protected fromUrl: boolean = false;
     protected outputTemp: boolean = false;
     protected mode: dokeBossMode = 'preview';
 
@@ -44,12 +46,12 @@ export default class dokeBoss extends dokeBossBase {
             this.session = fs.mkdtempSync(join(tmpdir(), 'dokuboss-'));
 
         this.addModule({
-            mimeType: /image\/.*/,
+            mimeType: /image\/.*|application\/pdf/,
             mode: 'preview',
             file: './modules/preview/image'
         });
         this.addModule({
-            mimeType: /image\/.*/,
+            mimeType: /image\/.*|application\/pdf/,
             mode: 'convert',
             file: './modules/convert/image'
         });
@@ -71,14 +73,25 @@ export default class dokeBoss extends dokeBossBase {
         });
 
         this.addModule({
-            mimeType: /^(?!image)(?!video).+\/.+$/,
+            mimeType: /^(?!image\/)(?!video\/)(?!text\/html).+$/,
             mode: 'preview',
             file: './modules/preview/document'
         });
         this.addModule({
-            mimeType: /^(?!image)(?!video).+\/.+$/,
+            mimeType: /^(?!image\/)(?!video\/)(?!text\/html).+$/,
             mode: 'convert',
             file: './modules/convert/document'
+        });
+
+        this.addModule({
+            mimeType: /text\/html/,
+            mode: 'preview',
+            file: './modules/preview/html'
+        });
+        this.addModule({
+            mimeType: /text\/html/,
+            mode: 'convert',
+            file: './modules/convert/html'
         });
 
         //todo: links
@@ -98,7 +111,15 @@ export default class dokeBoss extends dokeBossBase {
 
         this.inputMimeType = mimeType;
 
-        if (fileName instanceof Buffer) {
+        if (fileName.indexOf('http:') != -1 || fileName.indexOf('https:') != -1) {
+            this.fromUrl = true;
+            this.inputFileName = this._createTempFileName(this.inputMimeType);
+            if (this.inputMimeType == 'text/html') {
+                fs.writeFileSync(this.inputFileName, fileName.toString(), { flag: 'w', encoding: 'utf8' });
+            } else {
+                fs.writeFileSync(this.inputFileName, fileName.toString(), { flag: 'w', encoding: 'binary' });
+            }
+        } else if (fileName instanceof Buffer) {
             this.inputTemp = true;
             this.inputFileName = this._createTempFileName(this.inputMimeType);
             fs.writeFileSync(this.inputFileName, fileName, { flag: 'w', encoding: 'binary' });
@@ -230,24 +251,41 @@ export default class dokeBoss extends dokeBossBase {
         return join(session, (moduleName ? (moduleName + "-") : "") + Math.random().toString(36).substring(7) + '.' + ext);
     }
 
+    async downloadFile() {
+        if (this.fromUrl && this.inputMimeType != 'text/html') {
+
+            try {
+                const response = await axios.get(fs.readFileSync(this.inputFileName, { flag: 'r' }).toString(), { responseType: 'arraybuffer' });
+                const data = Buffer.from(response.data, 'binary');
+                fs.writeFileSync(this.inputFileName, data, { flag: 'w', encoding: 'binary' });
+            } catch (e) {
+                console.error(e);
+                throw new Error('can not download file ' + this.inputFileName);
+            }
+
+        }
+    }
+
     async convert(options: any = {}): Promise<Buffer> {
         this.mode = 'convert';
 
-        //convert from inputFile inputMimeType to outputFile outputMimeType
+        await this.downloadFile();
         await this.applyModules(options);
 
         return this.getResult();
     }
 
-    async preview(options: any = {}): Promise<Buffer | string> {
+    async preview(options: any = {}): Promise<Buffer> {
         this.mode = 'preview';
+
+        console.log(this.inputMimeType, this.outputMimeType);
 
         if (!this.outputMimeType.startsWith('image/')) {
             throw new Error('outputMimeType must be image');
         }
 
+        await this.downloadFile();
         await this.applyModules(options);
-        //make image from inputFile inputMimeType to outputFile outputMimeType (image/)
 
         return this.getResult();
     }
@@ -290,10 +328,38 @@ export default class dokeBoss extends dokeBossBase {
     }
 
     static from(pathToFile: string, mimeType?: string): dokeBoss {
-        const mime = mimeType ?? dokeBoss.getMimeTypeByExtention(pathToFile);
+        if ((pathToFile.indexOf('http:') != -1 || pathToFile.indexOf('https:') != -1)) {
+            return dokeBoss.fromUrl(pathToFile);
+        }
+
+        let mime = mimeType ?? dokeBoss.getMimeTypeByExtention(pathToFile);
         if (!mime)
             throw new Error('unrecognized mimeType');
         return new dokeBoss(pathToFile, mime);
+    }
+
+    static fromUrl(url: string): dokeBoss {
+        if (!url)
+            throw new Error('url is required');
+
+        if (!(url.indexOf('http:') != -1 || url.indexOf('https:') != -1)) {
+            throw new Error('url is not valid');
+        }
+
+        let mime = 'text/html';
+        const u = new URL(url);
+        const ext = u.pathname.split('.').pop();
+        if (ext) {
+            const m = dokeBoss.getMimeTypeByExtention(ext);
+            if (m)
+                mime = m;
+        }
+
+        return new dokeBoss(url, mime);
+    }
+
+    static sitePreview(url: string, options: any): Promise<Buffer> {
+        return dokeBoss.fromUrl(url).preview(options);
     }
 
     static fromBuffer(buffer: Buffer, mimeType: string): dokeBoss {
@@ -301,10 +367,6 @@ export default class dokeBoss extends dokeBossBase {
             throw new Error('mimeType is required');
 
         return new dokeBoss(buffer, mimeType);
-    }
-
-    static fromUrl(url: string): dokeBoss {
-        throw new Error('not implemented');
     }
 
     static bulk(glob: string): dokeBoss {

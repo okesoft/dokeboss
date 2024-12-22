@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/gettocat/dokeboss#readme",
   "dependencies": {
-    "await-spawn": "^4.0.2"
+    "await-spawn": "^4.0.2",
+    "axios": "^1.7.9",
+    "puppeteer": "^23.11.1"
   }
 }

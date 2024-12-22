@@ -137,3 +137,9 @@ build/*
 *.gif
 *.webm
 *.png
+test_conv.pdf
+*.docx
+*.doc
+*.xlsx
+*.pdf
+*.pptx

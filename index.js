@@ -41,6 +41,27 @@ async function main() {
         .after('crop', { x: 0, y: 300, width: 300, height: 300 })
         .preview({ quality: 40 })*/
 
+    /*
+    const data = await dokeBoss.from('./test.docx')
+        .to('./test_doc.jpg', { width: 300 })
+        .preview()*/
+
+    /*const data = await dokeBoss.from('./test.docx')
+        .to('./test_conv.doc', { width: 300 })
+        .convert()*/
+
+    /*
+    const data = await dokeBoss.from("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
+        .to('./dummy_page.jpg')
+        .preview()*/
+
+    /*const data = await dokeBoss.from("https://google.com")
+        .to('./page_1.jpg', { width: 300 })
+        .preview()*/
+    const data = await dokeBoss.from("https://twitch.tv")
+        .to('./page.docx')
+        .convert()
+
     console.log(data);
 }
 

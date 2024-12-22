@@ -58,6 +58,7 @@ export default class dokeBossBase {
             if (reg.test(mimeType)) {
                 for (let module of this.modules[i]) {
                     if (module instanceof dokeBossModule && module.getMode() == mode) {
+                        //console.log('apply module ' + module.moduleName + ' for ' + mimeType, reg);
                         const tmp = await module.run(buffer, mode, options);
                         if (!tmp) {
                             console.error('error in module ' + module.moduleName, module.getError().stderr?.toString() ?? module.getError().message);
