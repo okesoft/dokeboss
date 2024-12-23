@@ -58,9 +58,13 @@ async function main() {
     /*const data = await dokeBoss.from("https://google.com")
         .to('./page_1.jpg', { width: 300 })
         .preview()*/
-    const data = await dokeBoss.from("https://twitch.tv")
+    /*const data = await dokeBoss.from("https://twitch.tv")
         .to('./page.docx')
-        .convert()
+        .convert()*/
+
+    const data = await dokeBoss.bulk('preview', '*.jpg', '*.png', { width: 300, height: 300 }, (ob) => {
+
+    })
 
     console.log(data);
 }

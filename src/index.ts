@@ -3,6 +3,7 @@ import fs from 'fs';
 import { join } from 'node:path';
 import db from './db';
 import axios from 'axios';
+const fg = require('fast-glob');
 import dokeBossBase, { dokeBossModuleList } from './base';
 
 export type dokeBossMode = 'preview' | 'convert' | 'crop';
@@ -135,10 +136,13 @@ export default class dokeBoss extends dokeBossBase {
         }
 
     }
-    to(pathToFile: string, options: dokeBossOptions & { mimeType?: string } = {}): dokeBoss {
+    to(pathToFile: string, options: dokeBossOptions & { mimeType?: string } = {}, callback?: (obj: dokeBoss) => void): dokeBoss {
 
         if (!options)
             options = {};
+
+        if (!callback)
+            callback = () => { };
 
         if (!pathToFile)
             throw new Error('pathToFile is required');
@@ -167,6 +171,7 @@ export default class dokeBoss extends dokeBossBase {
 
         this.setOptions(options);
 
+        callback(this);
         return this;
     }
     toBuffer(mimeType: string, options: dokeBossOptions): dokeBoss {
@@ -369,8 +374,44 @@ export default class dokeBoss extends dokeBossBase {
         return new dokeBoss(buffer, mimeType);
     }
 
-    static bulk(glob: string): dokeBoss {
-        throw new Error('not implemented');
+    /**
+     * 
+     * @param mode {dokeBossMode}
+     * @param fromGlob {string | string[]}
+     * @param toFile {string} - will change {name} to file name
+     * @param options {any}
+     * @param callback {(obj: dokeBoss) => void}
+     * @returns {Promise<dokeBoss[]>}
+     */
+    static async bulk(mode: dokeBossMode, fromGlob: string | string[], toFile: string, options?: any, callback?: (obj: dokeBoss) => void): Promise<dokeBoss[]> {
+        if (!options)
+            options = {};
+
+        if (!callback)
+            callback = () => { };
+
+        const files = await fg(fromGlob);
+        if (!files.length)
+            return [];
+
+        const res: dokeBoss[] = [];
+        for (let i in files) {
+            const name = files[i].split('/').pop().split('.').shift();
+            const file = files[i];
+            //after can be in callback
+            const obj = dokeBoss.from(file)
+                .to(toFile.split("{name}").join(name), options, callback)
+
+            if (mode == 'preview') {
+                await obj.preview();
+            } else if (mode == 'convert') {
+                await obj.convert();
+            }
+
+            res.push(obj);
+        }
+
+        return res;
     }
 
 }

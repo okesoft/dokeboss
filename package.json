@@ -27,6 +27,7 @@
   "dependencies": {
     "await-spawn": "^4.0.2",
     "axios": "^1.7.9",
+    "fast-glob": "^3.3.2",
     "puppeteer": "^23.11.1"
   }
 }
