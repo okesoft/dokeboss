@@ -143,3 +143,5 @@ test_conv.pdf
 *.xlsx
 *.pdf
 *.pptx
+/tests/build
+tests/**/**.js

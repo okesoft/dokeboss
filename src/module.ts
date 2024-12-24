@@ -1,9 +1,10 @@
 import { join } from "path";
-import dokeBoss, { dokeBossMode } from ".";
+import dokeBoss, { dokeBossMode } from "./index";
 import fs from "fs";
+import dokeBossCallbackModule from "./callbackmodule";
 const spawn = require('await-spawn');
 
-export type dokeBossModuleCmd = { command: string, args?: string[], timeout?: number };
+export type dokeBossModuleCmd = { command: string, args?: string[], timeout?: number } | Buffer;
 export type dokeBossModuleCmdCallback = (inputFile: string, outputFile: string) => Promise<dokeBossModuleCmd>;
 export default class dokeBossModule {
     public moduleName: string;
@@ -33,16 +34,21 @@ export default class dokeBossModule {
         const outputFile = this.prepareFile(mimeType);
 
         try {
-            let { command, args, timeout }: dokeBossModuleCmd = await callback(inputFile, outputFile);
+            let res: dokeBossModuleCmd = await callback(inputFile, outputFile);
+            if (res instanceof Buffer) {
+                return res;
+            } else if ('command' in res) {
+                let { command, args, timeout } = res;
 
-            if (!args)
-                args = [inputFile, outputFile];
+                if (!args)
+                    args = [inputFile, outputFile];
 
-            if (this.debug)
-                console.log('doCmd debug >>', command, args.join(' '));
+                if (this.debug)
+                    console.log('doCmd debug >>', command, args.join(' '));
 
-            await spawn(command, args, { timeout: timeout || 15000, detached: true });
-            return this.fileContent(outputFile);
+                await spawn(command, args, { timeout: timeout || 15000, detached: true });
+                return this.fileContent(outputFile);
+            }
         } catch (e) {
             console.log(e);
             //console.log('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
@@ -85,7 +91,13 @@ export default class dokeBossModule {
         this.buffer = buffer;
         this.bufferMimeType = this.parent.getSrcMimeType();
 
-        let res = await this[mode](Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
+        let res;
+        if (this instanceof dokeBossCallbackModule) {
+            res = this.runCallback(Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
+        } else {
+            res = await this[mode](Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
+        }
+
         if (res instanceof Function) {
             return this.doCmd(this.parent.getDestMimeType(), res);
         }

@@ -1,7 +1,6 @@
-import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
+import dokeBossModule, { dokeBossModuleCmdCallback } from "../..//module";
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import dokuBoss from '../../index';
 import spawn = require("await-spawn");
 import url from 'url';
 

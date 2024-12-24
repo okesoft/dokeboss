@@ -1,4 +1,6 @@
 const dokeBoss = require('./build/index').default;
+const dokeBossBase = dokeBoss.dokeBossBase;
+
 /*
 dokeBoss.from('path/to/your/file.docx')
     .to('path/to/your/output', { width: 300, height: 300 })
@@ -11,9 +13,9 @@ dokeBoss
 */
 
 async function main() {
-    /*const data = await dokeBoss.from('./test.png')
+    const data = await dokeBoss.from('./test.png')
         .to('./preview.jpg', { width: 300, height: 300 })
-        .preview()*/
+        .preview()
 
     /*const data = await dokeBoss.from('./test.png')
         .to('./test2.jpg')
@@ -62,11 +64,28 @@ async function main() {
         .to('./page.docx')
         .convert()*/
 
+    /*
     const data = await dokeBoss.bulk('preview', '*.jpg', '*.png', { width: 300, height: 300 }, (ob) => {
+        //do something with the object before convert/preivew operation
+    })*/
 
-    })
-
+    /*
+    const data = await dokeBoss
+        .addModule({
+            on: 'after',//before default modules or after, onlu for callback
+            mode: 'remove',
+            mimeType: /.*'/,
+            callback: (inputFile, outputFile) => {
+                console.log('remove callback-module triggered')
+                return Buffer.from('');
+            }
+        })
+        .from('./test.png')
+        .to('./test2.jpg')
+        .convert();
+        */
     console.log(data);
+
 }
 
 

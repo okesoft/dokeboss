@@ -1,7 +1,15 @@
-import { dokeBossMode, dokeBossOptions } from ".";
-import dokeBossModule from "./module";
+import { dokeBossMode } from "./index";
+import dokeBossCallbackModule from "./callbackmodule";
+import dokeBossModule, { dokeBossModuleCmdCallback } from "./module";
 
-export type dokeBossModuleList = { mimeType: string[] | RegExp, mode: dokeBossMode, file: string };
+export type dokeBossModuleList = {
+    on?: 'before' | 'after',
+    mimeType: string[] | RegExp,
+    mode: dokeBossMode,
+    file?: string,
+    callback?: (options: any, mimeType: string) => dokeBossModuleCmdCallback
+};
+
 export default class dokeBossBase {
     protected modules: { [key: string]: dokeBossModuleList[] } = {};
     protected afterList: { mode: dokeBossMode, options: any }[] = [];
@@ -11,8 +19,13 @@ export default class dokeBossBase {
             this.addModule(module);
         }
     }
-    addModule(module: dokeBossModuleList): dokeBossBase {
-        const { mimeType, file, mode } = module;
+    public addModule(module: dokeBossModuleList): ThisParameterType<dokeBossBase> {
+        const { mimeType, file, callback, mode } = module;
+
+        if (!file && (!callback || !(callback instanceof Function))) {
+            throw new Error('file or callback is required in module');
+        }
+
         try {
             let data = this.modules;
 
@@ -28,10 +41,15 @@ export default class dokeBossBase {
 
             let obj = null;
             try {
-                const cls = require(file);
-                obj = new cls.default(this);
+                if (callback && !file) {
+                    obj = new dokeBossCallbackModule(mode, callback, this);
+                } else {
+                    const cls = require(file);
+                    obj = new cls.default(this);
+                }
             } catch (e) {
-
+                console.log('load module error:', e);
+                throw new Error('can not load module ');
             }
 
             if (!obj)
@@ -57,7 +75,7 @@ export default class dokeBossBase {
             const reg = new RegExp(i);
             if (reg.test(mimeType)) {
                 for (let module of this.modules[i]) {
-                    if (module instanceof dokeBossModule && module.getMode() == mode) {
+                    if (module instanceof dokeBossModule && (module.getMode() == mode || module instanceof dokeBossCallbackModule)) {//callback module runs at any mode
                         //console.log('apply module ' + module.moduleName + ' for ' + mimeType, reg);
                         const tmp = await module.run(buffer, mode, options);
                         if (!tmp) {

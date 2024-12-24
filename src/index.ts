@@ -20,6 +20,8 @@ export type dokeBossOptions = {
 }
 
 export default class dokeBoss extends dokeBossBase {
+    public static dokeBossBase: dokeBossBase;
+    protected static globalModules: dokeBossModuleList[] = [];
     protected session: string = '';
     protected inputTemp: boolean = false;
     protected fromUrl: boolean = false;
@@ -45,6 +47,13 @@ export default class dokeBoss extends dokeBossBase {
 
         if (!this.session)
             this.session = fs.mkdtempSync(join(tmpdir(), 'dokuboss-'));
+
+        if (dokeBoss.globalModules.length) {
+            for (let i in dokeBoss.globalModules) {
+                if (dokeBoss.globalModules[i].on == 'before')
+                    this.addModule(dokeBoss.globalModules[i]);
+            }
+        }
 
         this.addModule({
             mimeType: /image\/.*|application\/pdf/,
@@ -95,7 +104,12 @@ export default class dokeBoss extends dokeBossBase {
             file: './modules/convert/html'
         });
 
-        //todo: links
+        if (dokeBoss.globalModules.length) {
+            for (let i in dokeBoss.globalModules) {
+                if (dokeBoss.globalModules[i].on == 'after' || !dokeBoss.globalModules[i].on)
+                    this.addModule(dokeBoss.globalModules[i]);
+            }
+        }
 
         if (!fileName) {
             throw new Error('fileName is required');
@@ -414,4 +428,8 @@ export default class dokeBoss extends dokeBossBase {
         return res;
     }
 
+    static addModule(module: dokeBossModuleList): typeof dokeBoss {
+        dokeBoss.globalModules.push(module);
+        return dokeBoss;
+    }
 }
