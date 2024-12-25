@@ -95,4 +95,6 @@ export default class dokeBossBase {
         return this;
     }
 
+    async convert(options: any = {}): Promise<Buffer> { return Buffer.from(''); }
+    async preview(options: any = {}): Promise<Buffer> { return Buffer.from(''); }
 }

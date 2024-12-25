@@ -36,6 +36,7 @@ export default class dokeBossModule {
         try {
             let res: dokeBossModuleCmd = await callback(inputFile, outputFile);
             if (res instanceof Buffer) {
+                fs.writeFileSync(outputFile, res);
                 return res;
             } else if ('command' in res) {
                 let { command, args, timeout } = res;
@@ -93,7 +94,7 @@ export default class dokeBossModule {
 
         let res;
         if (this instanceof dokeBossCallbackModule) {
-            res = this.runCallback(Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
+            res = await this.runCallback(Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
         } else {
             res = await this[mode](Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
         }

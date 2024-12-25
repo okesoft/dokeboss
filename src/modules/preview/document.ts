@@ -21,8 +21,6 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
         }
 
         try {
-            //console.log('magick', outputPdfFile, outputFile)
-            //
             await spawn('magick', [outputPdfFile + "[0]", '-density', '150', '-trim', '-flatten', '-quality', '100', '-sharpen', '0x1.0', outputFile], { timeout: 15000 });
 
             return this.fileContent(outputFile);

@@ -8,6 +8,7 @@ export default class dokeBossDocumentConvertModule extends dokeBossModule {
 
     async convert(options: any, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         return async (inputFile, outputFile) => {
+            console.log('convert', inputFile, outputFile)
             return {
                 command: 'unoconvert',
                 args: ['--host-location', 'remote', inputFile, outputFile],

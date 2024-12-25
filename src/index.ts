@@ -310,7 +310,7 @@ export default class dokeBoss extends dokeBossBase {
     }
 
     async applyModules(options: any): Promise<Buffer> {
-        console.log(this.mode, this.inputFileName, this.inputMimeType, this.outputFileName, this.outputMimeType);
+        //console.log(this.mode, this.inputFileName, this.inputMimeType, this.outputFileName, this.outputMimeType);
         let buffer: Buffer = fs.readFileSync(this.inputFileName, { flag: 'r' });
         const res = await super.applyModules(this.inputMimeType, buffer, this.mode, options);
         let buff = res;
@@ -377,8 +377,8 @@ export default class dokeBoss extends dokeBossBase {
         return new dokeBoss(url, mime);
     }
 
-    static sitePreview(url: string, options: any): Promise<Buffer> {
-        return dokeBoss.fromUrl(url).preview(options);
+    static sitePreview(url: string, options: any = {}): Promise<Buffer> {
+        return dokeBoss.fromUrl(url).preview(options || {});
     }
 
     static fromBuffer(buffer: Buffer, mimeType: string): dokeBoss {
