@@ -92,7 +92,7 @@ export default class dokeBoss extends dokeBossBase {
             file: './modules/preview/document'
         });
         this.addModule({
-            mimeType: /^(?!image\/)(?!video\/)(?!text\/html).+$/,
+            mimeType: /^(?!image\/)(?!video\/)(?!text\/html).+$/,//todo: maybe application/pdf should exclude also
             mode: 'convert',
             file: './modules/convert/document'
         });
