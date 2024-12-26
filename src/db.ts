@@ -5415,6 +5415,11 @@ export default {
     "compressible": false,
     "extensions": ["jpg", "jpeg", "jpe"]
   },
+  "image/jpg": {
+    "source": "iana",
+    "compressible": false,
+    "extensions": ["jpg"]
+  },
   "image/jpm": {
     "source": "iana"
   },

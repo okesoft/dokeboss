@@ -22,6 +22,8 @@ export type dokeBossOptions = {
 export default class dokeBoss extends dokeBossBase {
     public static dokeBossBase: dokeBossBase;
     protected static globalModules: dokeBossModuleList[] = [];
+    protected static downloadTimeOut = 120000;
+
     protected session: string = '';
     protected inputTemp: boolean = false;
     protected fromUrl: boolean = false;
@@ -163,14 +165,6 @@ export default class dokeBoss extends dokeBossBase {
         if (!pathToFile)
             throw new Error('pathToFile is required');
 
-        try {
-            fs.writeFileSync(pathToFile, "", { flag: 'w', encoding: 'binary' });
-            this.outputFileName = pathToFile;
-        } catch (e) {
-            console.error(e)
-            throw new Error('pathToFile is not writable');
-        }
-
         if (!options.mimeType) {
             const mime = dokeBoss.getMimeTypeByExtention(pathToFile);
             if (mime) {
@@ -179,18 +173,28 @@ export default class dokeBoss extends dokeBossBase {
             } else {
                 throw new Error('unrecognized mimeType');
             }
+        } else {
+            this.outputMimeType = options.mimeType;
         }
 
-        const ext = dokeBoss.getExtensionByMimeType(options.mimeType);
+        const ext = dokeBoss.getExtensionByMimeType(this.outputMimeType);
         if (!ext)
             throw new Error('unrecognized mimeType');
+
+        try {
+            fs.writeFileSync(pathToFile, "", { flag: 'w', encoding: 'binary' });
+            this.outputFileName = pathToFile;
+        } catch (e) {
+            console.error(e)
+            throw new Error('pathToFile is not writable');
+        }
 
         this.setOptions(options);
 
         callback(this);
         return this;
     }
-    toBuffer(mimeType: string, options: dokeBossOptions): dokeBoss {
+    toBuffer(mimeType: string, options?: dokeBossOptions): dokeBoss {
         if (!mimeType)
             throw new Error('mimeType is required');
 
@@ -276,15 +280,20 @@ export default class dokeBoss extends dokeBossBase {
         if (this.fromUrl && this.inputMimeType != 'text/html') {
 
             try {
-                const response = await axios.get(fs.readFileSync(this.inputFileName, { flag: 'r' }).toString(), { responseType: 'arraybuffer' });
+                const response = await axios.get(fs.readFileSync(this.inputFileName, { flag: 'r' }).toString(), { timeout: dokeBoss.downloadTimeOut, responseType: 'arraybuffer' });
                 const data = Buffer.from(response.data, 'binary');
                 fs.writeFileSync(this.inputFileName, data, { flag: 'w', encoding: 'binary' });
             } catch (e) {
                 console.error(e);
-                throw new Error('can not download file ' + this.inputFileName);
+                throw new Error('can not download file');
             }
 
         }
+    }
+
+    static setDownloadTimeout(timeout: number): typeof dokeBoss {
+        dokeBoss.downloadTimeOut = timeout;
+        return dokeBoss;
     }
 
     async convert(options: any = {}): Promise<Buffer> {
@@ -387,7 +396,10 @@ export default class dokeBoss extends dokeBossBase {
     }
 
     static fromBuffer(buffer: Buffer, mimeType: string): dokeBoss {
-        if (!mimeType || !buffer)
+        if (!buffer)
+            throw new Error('buffer is required');
+
+        if (!mimeType)
             throw new Error('mimeType is required');
 
         return new dokeBoss(buffer, mimeType);
@@ -405,6 +417,9 @@ export default class dokeBoss extends dokeBossBase {
     static async bulk(mode: dokeBossMode, fromGlob: string | string[], toFile: string, options?: any, callback?: (obj: dokeBoss) => void): Promise<dokeBoss[]> {
         if (!options)
             options = {};
+
+        if (toFile.indexOf("{name}") == -1)
+            throw new Error('toFile must contain {name} placeholder');
 
         if (!callback)
             callback = () => { };
