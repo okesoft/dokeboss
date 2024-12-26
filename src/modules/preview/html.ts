@@ -33,7 +33,7 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
         try {
             await spawn('magick', [outputPdfFile + "[0]", '-density', '500', '-trim', '-flatten', '-quality', '100', outputFile], { timeout: 15000 });
         } catch (e) {
-            console.log('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
+            console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
         }
 

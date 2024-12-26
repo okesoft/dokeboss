@@ -48,7 +48,7 @@ export default class dokeBossBase {
                     obj = new cls.default(this);
                 }
             } catch (e) {
-                console.log('load module error:', e);
+                console.error('load module error:', e);
                 throw new Error('can not load module ');
             }
 
@@ -76,8 +76,7 @@ export default class dokeBossBase {
             if (reg.test(mimeType)) {
                 for (let module of this.modules[i]) {
                     if (module instanceof dokeBossModule && (module.getMode() == mode || module instanceof dokeBossCallbackModule)) {//callback module runs at any mode
-                        //console.log('apply module ' + module.moduleName + ' for ' + mimeType, reg);
-                        const tmp = await module.run(buffer, mode, options);
+                        const tmp = await module.run(buffer, mimeType, mode, options);
                         if (!tmp) {
                             console.error('error in module ' + module.moduleName, module.getError().stderr?.toString() ?? module.getError().message);
                         } else {

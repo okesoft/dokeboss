@@ -51,7 +51,7 @@ export default class dokeBossModule {
                 return this.fileContent(outputFile);
             }
         } catch (e) {
-            console.log(e);
+            console.error(e);
             //console.log('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             //throw e;
             this.error = e;
@@ -88,19 +88,20 @@ export default class dokeBossModule {
         })
     }
 
-    public async run(buffer: Buffer, mode: dokeBossMode = 'preview', options: any = {}): Promise<Buffer | false> {
+    public async run(buffer: Buffer, bufferMimeType: string, mode: dokeBossMode = 'preview', options: any = {}): Promise<Buffer | false> {
         this.buffer = buffer;
-        this.bufferMimeType = this.parent.getSrcMimeType();
+        this.bufferMimeType = bufferMimeType;
+        let destMime = options?.mimeType ?? this.parent.getDestMimeType();
 
         let res;
         if (this instanceof dokeBossCallbackModule) {
-            res = await this.runCallback(Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
+            res = await this.runCallback(Object.assign({}, this.parent.getOptions(), options), destMime);
         } else {
-            res = await this[mode](Object.assign({}, this.parent.getOptions(), options), this.parent.getDestMimeType());
+            res = await this[mode](Object.assign({}, this.parent.getOptions(), options), destMime);
         }
 
         if (res instanceof Function) {
-            return this.doCmd(this.parent.getDestMimeType(), res);
+            return this.doCmd(destMime, res);
         }
 
         return res;

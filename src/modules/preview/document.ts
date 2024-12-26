@@ -15,7 +15,7 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
         try {
             await spawn('unoconvert', ['--host-location', 'remote', inputFile, outputPdfFile]);
         } catch (e) {
-            console.log('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
+            console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
             throw new Error('can not preview document');
         }
@@ -25,7 +25,7 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
 
             return this.fileContent(outputFile);
         } catch (e) {
-            console.log('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
+            console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
         }
 

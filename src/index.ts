@@ -41,10 +41,12 @@ export default class dokeBoss extends dokeBossBase {
     protected outputImageBackground: string;
     protected outputImageBlur: any;
     protected outputVideoForceAspect: boolean = false;
+    protected inputOriginalFileName: string | Buffer<ArrayBufferLike> = '';
 
     constructor(fileName: string | Buffer, mimeType: string, modules: dokeBossModuleList[] = []) {
         super(modules);
 
+        this.inputOriginalFileName = fileName;
         if (!this.session)
             this.session = fs.mkdtempSync(join(tmpdir(), 'dokuboss-'));
 
@@ -296,9 +298,6 @@ export default class dokeBoss extends dokeBossBase {
 
     async preview(options: any = {}): Promise<Buffer> {
         this.mode = 'preview';
-
-        console.log(this.inputMimeType, this.outputMimeType);
-
         if (!this.outputMimeType.startsWith('image/')) {
             throw new Error('outputMimeType must be image');
         }
@@ -310,7 +309,6 @@ export default class dokeBoss extends dokeBossBase {
     }
 
     async applyModules(options: any): Promise<Buffer> {
-        //console.log(this.mode, this.inputFileName, this.inputMimeType, this.outputFileName, this.outputMimeType);
         let buffer: Buffer = fs.readFileSync(this.inputFileName, { flag: 'r' });
         const res = await super.applyModules(this.inputMimeType, buffer, this.mode, options);
         let buff = res;
@@ -329,8 +327,15 @@ export default class dokeBoss extends dokeBossBase {
         return fs.readFileSync(this.outputFileName, { flag: 'r' });
     }
 
+    getOriginalFileName(): string | Buffer<ArrayBufferLike> {
+        return this.inputOriginalFileName;
+    }
+    getOutputFileName(): string {
+        return this.outputFileName;
+    }
+
     static getMimeTypeByExtention(pathToFile: string): string | false {
-        const ext = pathToFile.split('.').pop();
+        const ext = pathToFile.split('.').pop().toLowerCase();
         for (let mime in db) {
             if (db[mime] && db[mime]?.extensions)
                 if (db[mime]?.extensions.indexOf(ext) != -1)
@@ -346,12 +351,12 @@ export default class dokeBoss extends dokeBossBase {
         return false;
     }
 
-    static from(pathToFile: string, mimeType?: string): dokeBoss {
-        if ((pathToFile.indexOf('http:') != -1 || pathToFile.indexOf('https:') != -1)) {
+    static from(pathToFile: string | Buffer, mimeType?: string): dokeBoss {
+        if (typeof pathToFile == 'string' && (pathToFile.indexOf('http:') != -1 || pathToFile.indexOf('https:') != -1)) {
             return dokeBoss.fromUrl(pathToFile);
         }
 
-        let mime = mimeType ?? dokeBoss.getMimeTypeByExtention(pathToFile);
+        let mime = mimeType ?? dokeBoss.getMimeTypeByExtention(typeof pathToFile == 'string' ? pathToFile : '');
         if (!mime)
             throw new Error('unrecognized mimeType');
         return new dokeBoss(pathToFile, mime);

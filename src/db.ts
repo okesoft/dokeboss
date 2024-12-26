@@ -5635,6 +5635,14 @@ export default {
     "source": "apache",
     "extensions": ["ppm"]
   },
+  "image/heic": {
+    "source": "apache",
+    "extensions": ["heic"]
+  },
+  "image/heic-sequence": {
+    "source": "apache",
+    "extensions": ["heics"]
+  },
   "image/x-rgb": {
     "source": "apache",
     "extensions": ["rgb"]

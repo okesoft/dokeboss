@@ -84,7 +84,7 @@ async function main() {
         .to('./test2.jpg')
         .convert();
         */
-    console.log(data);
+    //(data);
 
 }
 

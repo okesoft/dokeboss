@@ -9,7 +9,7 @@ export default class dokeBossImagePreviewModule extends dokeBossModule {
     async preview(options: any, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         return async (inputFile, outputFile) => {
             this.debug = true;
-            const args = [inputFile, outputFile];
+            const args = [inputFile + "[0]", outputFile];
 
             if (options.width > 0) {
                 args.splice(

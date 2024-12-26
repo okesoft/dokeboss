@@ -30,12 +30,11 @@ export default class dokeBossHtmlConvertModule extends dokeBossModule {
         });
 
         await browser.close();
-        console.log('pdf', outputPdfFile, outputFile);
 
         try {
             await spawn('unoconvert', ['--host-location', 'remote', outputPdfFile, outputFile], { timeout: 150000 });
         } catch (e) {
-            console.log('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
+            console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
         }
 
