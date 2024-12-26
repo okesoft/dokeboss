@@ -14,8 +14,8 @@ describe('bulk images preview', () => {
     it('bulk preview of path images', async () => {
         const map = {
             '1.jpg': 70000,
-            '2.jpg': 90000,
-            '3.jpg': 110000,
+            '2.jpg': 80000,
+            '3.jpg': 100000,
             '4.jpg': 85000,
             '5.jpg': 45000,
         }

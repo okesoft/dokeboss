@@ -14,10 +14,10 @@ describe('bulk images convert', () => {
     it('bulk convert jpg images to webp', async () => {
         const map = {
             '1.jpg': 150000,
-            '2.jpg': 200000,
-            '3.jpg': 245000,
-            '4.jpg': 205000,
-            '5.jpg': 103000,
+            '2.jpg': 150000,
+            '3.jpg': 200000,
+            '4.jpg': 170000,
+            '5.jpg': 90000,
         }
         const r = parseInt("" + (Math.random() * 1000));
 
