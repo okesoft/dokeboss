@@ -1,4 +1,4 @@
-import { dokeBossMode } from "./index";
+import dokeBoss, { dokeBossMode } from "./index";
 import dokeBossCallbackModule from "./callbackmodule";
 import dokeBossModule, { dokeBossModuleCmdCallback } from "./module";
 
@@ -19,6 +19,7 @@ export default class dokeBossBase {
             this.addModule(module);
         }
     }
+
     public addModule(module: dokeBossModuleList): ThisParameterType<dokeBossBase> {
         const { mimeType, file, callback, mode } = module;
 
@@ -43,6 +44,7 @@ export default class dokeBossBase {
             try {
                 if (callback && !file) {
                     obj = new dokeBossCallbackModule(mode, callback, this);
+                    obj.setTimeout(dokeBoss.timeout);
                 } else {
                     const cls = require(file);
                     obj = new cls.default(this);

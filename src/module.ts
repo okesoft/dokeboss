@@ -8,6 +8,7 @@ export type dokeBossModuleCmd = { command: string, args?: string[], timeout?: nu
 export type dokeBossModuleCmdCallback = (inputFile: string, outputFile: string) => Promise<dokeBossModuleCmd>;
 export default class dokeBossModule {
     public moduleName: string;
+    protected timeout = 15000;
     protected mode: dokeBossMode = 'preview';
     protected debug: boolean = false;
     protected type: 'input' | 'output' = 'output';
@@ -29,6 +30,10 @@ export default class dokeBossModule {
         return this.mode;
     }
 
+    public setTimeout(timeout: number) {
+        this.timeout = timeout;
+    }
+
     protected async doCmd(mimeType: string, callback: dokeBossModuleCmdCallback): Promise<Buffer | false> {
         const inputFile = this.prepareFile(this.bufferMimeType, this.buffer);
         const outputFile = this.prepareFile(mimeType);
@@ -47,7 +52,7 @@ export default class dokeBossModule {
                 if (this.debug)
                     console.log('doCmd debug >>', command, args.join(' '));
 
-                await spawn(command, args, { timeout: timeout || 15000, detached: true });
+                await spawn(command, args, { timeout: timeout || this.timeout, detached: true });
                 return this.fileContent(outputFile);
             }
         } catch (e) {

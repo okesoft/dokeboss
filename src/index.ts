@@ -3,6 +3,7 @@ import fs from 'fs';
 import { join } from 'node:path';
 import db from './db';
 import axios from 'axios';
+import FormData from 'form-data';
 const fg = require('fast-glob');
 import dokeBossBase, { dokeBossModuleList } from './base';
 
@@ -23,7 +24,10 @@ export default class dokeBoss extends dokeBossBase {
     public static dokeBossBase: dokeBossBase;
     protected static globalModules: dokeBossModuleList[] = [];
     protected static downloadTimeOut = 120000;
+    //https?://host:port
+    protected static remote: string | false = false;
 
+    public static timeout = 15000;
     protected session: string = '';
     protected inputTemp: boolean = false;
     protected fromUrl: boolean = false;
@@ -290,16 +294,73 @@ export default class dokeBoss extends dokeBossBase {
 
         }
     }
-
     static setDownloadTimeout(timeout: number): typeof dokeBoss {
         dokeBoss.downloadTimeOut = timeout;
         return dokeBoss;
+    }
+
+    static setRemote(remote: string | boolean): typeof dokeBoss {
+        try {
+
+            if (!remote)
+                return;
+
+            if (remote === true) {
+                remote = 'http://localhost:5001';
+            }
+
+            const url = new URL(remote);
+            dokeBoss.remote = remote;
+            return dokeBoss;
+        } catch (e) {
+            throw new Error('remote is not valid, must be an url https?://host:port');
+        }
+    }
+
+    async doRemote(options: any = {}): Promise<Buffer> {
+
+        let request: any = {};
+        const data = new FormData();
+        const uploadId = require('crypto')
+            .createHash('sha256')
+            .update(fs.readFileSync(this.inputFileName, { flag: 'r', encoding: 'binary' }))
+            .update(JSON.stringify(options))
+            .digest('hex');
+
+        data.append('type', this.mode);
+        data.append('outputMimeType', this.outputMimeType);
+        data.append('options', JSON.stringify(options));
+        data.append('file', fs.createReadStream(this.inputFileName), this.inputFileName.split('/').pop());
+        data.append('uploadId', uploadId);
+        console.log(dokeBoss.remote + "/upload", uploadId);
+        try {
+            request = await axios.request({
+                method: 'post',
+                url: dokeBoss.remote + "/upload",
+                data,
+                timeout: dokeBoss.timeout,
+                responseType: 'arraybuffer'
+            });
+
+            fs.writeFileSync(this.outputFileName, request.data, { flag: 'w', encoding: 'binary' });
+
+            return Buffer.from(request.data);
+        } catch (e) {
+            console.log('error', e.response.status, e.response.statusText, e.message, e.response.data)
+            throw new Error('can not convert file with remote');
+        }
+
     }
 
     async convert(options: any = {}): Promise<Buffer> {
         this.mode = 'convert';
 
         await this.downloadFile();
+
+        if (dokeBoss.remote) {
+            return this.doRemote(Object.assign({}, this.getOptions(), options));
+        }
+
         await this.applyModules(options);
 
         return this.getResult();
@@ -312,6 +373,11 @@ export default class dokeBoss extends dokeBossBase {
         }
 
         await this.downloadFile();
+
+        if (dokeBoss.remote) {
+            return this.doRemote(Object.assign({}, this.getOptions(), options));
+        }
+
         await this.applyModules(options);
 
         return this.getResult();
@@ -341,6 +407,11 @@ export default class dokeBoss extends dokeBossBase {
     }
     getOutputFileName(): string {
         return this.outputFileName;
+    }
+
+    static setOperationTimeout(timeout: number): typeof dokeBoss {
+        dokeBoss.timeout = timeout;
+        return dokeBoss;
     }
 
     static getMimeTypeByExtention(pathToFile: string): string | false {

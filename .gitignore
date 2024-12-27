@@ -133,3 +133,6 @@ build/*
 generated*
 /tests/build
 tests/**/**.js
+1.jpg
+1.png
+/api

@@ -13,10 +13,10 @@ dokeBoss
 */
 
 async function main() {
-    const data = await dokeBoss.from('./test.png')
+    /*const data = await dokeBoss.from('./test.png')
         .to('./preview.jpg', { width: 300, height: 300 })
         .preview()
-
+*/
     /*const data = await dokeBoss.from('./test.png')
         .to('./test2.jpg')
         .convert()*/
@@ -85,6 +85,14 @@ async function main() {
         .convert();
         */
     //(data);
+
+    const data = await dokeBoss
+        .setRemote(true)//will send request to localhost:5001
+        .from('./1.jpg')
+        .to('./1.png', { width: 300, height: 300 })
+        .preview()
+
+    console.log(data);
 
 }
 
