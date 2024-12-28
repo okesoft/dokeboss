@@ -2,6 +2,7 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 import fs from 'fs';
 import dokeBoss from '.';
+import fg from 'fast-glob';
 
 export class dokeBossApi {
     app: typeof express;
@@ -31,6 +32,9 @@ export class dokeBossApi {
         process.on('SIGUSR2', async () => {
             await this.stop();
         });
+
+        //remove old files from path
+        this.removeOldFiles();
 
         this.app = express();
 
@@ -127,7 +131,19 @@ export class dokeBossApi {
         });
 
     }
+    async removeOldFiles() {
+        const entries = await fg('./api/files/*', { dot: true });
+        for (let file of entries) {
+            await new Promise(async resolve => {
+                fs.rm(file, () => {
+                    resolve(1);
+                });
 
+            });
+        }
+
+        return true;
+    }
     stop() {
         this.server.close(() => {
             process.exit(0);
