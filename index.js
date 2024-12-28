@@ -86,11 +86,18 @@ async function main() {
         */
     //(data);
 
-    const data = await dokeBoss
+    /*const data = await dokeBoss
         .setRemote(true)//will send request to localhost:5001
         .from('./1.jpg')
         .to('./1.png', { width: 300, height: 300 })
-        .preview()
+        .preview()*/
+
+    const data = await dokeBoss
+        .setOperationTimeout(90000)
+        .setRemote(true)//will send request to localhost:5001
+        .from('http://google.com')
+        .to('./1.pdf', { width: 300, height: 300 })
+        .convert()
 
     console.log(data);
 

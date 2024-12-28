@@ -113,6 +113,35 @@ const data = await dokeBoss.bulk('preview', '*.jpg', '{name}.png', { width: 300,
 })
 ```
 
+**Remote api**
+
+You can make remote convertation with rest api included in this package. Just run `node build/api.js` or `npm run serve` and add to invoke command:
+important notice: .after, custom and callback modules as well as site preview to pdf is not working in remote mode.
+
+```typescript
+await getDoku()
+        .setRemote(true)//also can be an url: https?://host:port. true mean will look in localhost:5001
+        //.after and custom/callback modules is not applicable in remote mode yet
+        .from(inputFile)
+        .to(outputFile, { width: 300, height: 300 })
+        .convert();
+```
+
+remote script have next env variables:
+```
+DOKEBOSS_API_HOST - host of server, default is 127.0.0.1
+DOKEBOSS_API_PORT - port of server, default is 5001
+DOKEBOSS_API_FILESIZE - max file size, default is 1024*1024*1024 bytes
+DOKEBOSS_API_FILEUPLOAD_LOG - debug enabled/disabled, default is false
+DOKEBOSS_API_FILEUPLOAD_LOG_FILE - debug log file, default '/tmp/fileupload.log'
+DOKEBOSS_API_FILEUPLOAD_TIMEOUT - upload timeout, default is 120000 (120 sec)
+```
+
+also you can run remote script in docker with all depedencies:
+```
+//TODO docker run command
+```
+
 **callbacks modules**
 
 ```typescript

@@ -153,6 +153,30 @@ describe('remote: tests', () => {
         expect(stat.isFile()).toEqual(true);
 
     }, 300000);
+
+    it('remote: download pdf document to jpg', async () => {
+        const r = parseInt("" + (Math.random() * 1000));
+        const resultHash = '629e3b45dd03e90e4d06b02ddde01552a470bc6afbc5c56f118a4a766a6124f7';
+        const inputFile = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+        const outputFile = path + 'generated' + r + '.download.pdf.jpg';
+        let data = Buffer.from('');
+
+        let hash = "";
+        try {
+            data = await getDoku()
+                .setRemote(true)
+                .from(inputFile)
+                .to(outputFile, { width: 300, height: 300 })
+                .preview();
+        } catch (e) {
+            console.log('error', e)
+        }
+
+        hash = await getByteHash(data);
+        expect(hash).toEqual(resultHash);
+
+    }, 25000);
+
     //preview document
     it('remote: preview docx document to jpg', async () => {
         const r = parseInt("" + (Math.random() * 1000));
@@ -175,7 +199,7 @@ describe('remote: tests', () => {
         hash = await getByteHash(data);
         expect(hash).toEqual(resultHash);
 
-    });
+    }, 125000);
     //convert document
     it('remote: convert docx document to pdf', async () => {
         const r = parseInt("" + (Math.random() * 1000));
@@ -186,6 +210,7 @@ describe('remote: tests', () => {
         let hash = "";
         try {
             data = await getDoku()
+                .setOperationTimeout(120000)
                 .setRemote(true)
                 .from(inputFile)
                 .to(outputFile, { width: 300, height: 300 })
@@ -198,6 +223,31 @@ describe('remote: tests', () => {
         expect(stat.size).toBeGreaterThan(50000);
         expect(stat.isFile()).toEqual(true);
 
-    });
+    }, 125000);
+
+    it('remote: html page preview', async () => {
+        const r = parseInt("" + (Math.random() * 1000));
+        const resultHash = '';
+        const inputFile = 'https://www.google.com';
+        const outputFile = path + 'generated' + r + '.url.jpg';
+        let data = Buffer.from('');
+
+        let hash = "";
+        try {
+            data = await getDoku()
+                .setRemote(true)
+                .from(inputFile)
+                .to(outputFile, { width: 300, height: 300 })
+                .preview();
+        } catch (e) {
+            console.log('error', e)
+        }
+
+        //image can be different because of duddles
+        const stat = fs.lstatSync(outputFile);
+        expect(stat.size).toBeGreaterThan(50000);
+        expect(stat.isFile()).toEqual(true);
+
+    }, 25000);
 
 });

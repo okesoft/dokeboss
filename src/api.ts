@@ -1,7 +1,6 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
 import fs from 'fs';
-import crypto from 'crypto';
 import dokeBoss from '.';
 
 export class dokeBossApi {
@@ -35,20 +34,21 @@ export class dokeBossApi {
 
         this.app = express();
 
-        const port = process.env.API_PORT || 5001;
-        const fileSize = process.env.API_FILESIZE || 1024 * 1024 * 1024;
+        const host = process.env.DOKEBOSS_API_HOST || '127.0.0.1';
+        const port = process.env.DOKEBOSS_API_PORT || 5001;
+        const fileSize = process.env.DOKEBOSS_API_FILESIZE || 1024 * 1024 * 1024;
         this.app.use(express.json());
         this.app.use(fileUpload({
             limits: { fileSize },
             useTempFiles: true,
             tempFileDir: '/tmp/',
             createParentPath: true,
-            debug: process.env.API_FILEUPLOAD_LOG || false,
-            uploadTimeout: process.env.API_FILEUPLOAD_TIMEOUT || 120000,
+            debug: process.env.DOKEBOSS_API_FILEUPLOAD_LOG || false,
+            uploadTimeout: process.env.DOKEBOSS_API_FILEUPLOAD_TIMEOUT || 120000,
             logger: {
                 log: (message) => {
-                    if (process.env.API_FILEUPLOAD_LOG)
-                        fs.writeFileSync(process.env.API_FILEUPLOAD_LOG_FILE ?? '/tmp/fileupload.log', message, { flag: 'a+', encoding: 'utf8' });
+                    if (process.env.DOKEBOSS_API_FILEUPLOAD_LOG)
+                        fs.writeFileSync(process.env.DOKEBOSS_API_FILEUPLOAD_LOG_FILE ?? '/tmp/fileupload.log', message, { flag: 'a+', encoding: 'utf8' });
                 }
             }
         }));
@@ -122,7 +122,7 @@ export class dokeBossApi {
             readableStream.pipe(res);
         });
 
-        this.server = this.app.listen(port, () => {
+        this.server = this.app.listen(port, host, () => {
             console.log(`Server is running on port ${port}`);
         });
 
