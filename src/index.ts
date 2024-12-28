@@ -332,7 +332,7 @@ export default class dokeBoss extends dokeBossBase {
         data.append('options', JSON.stringify(options));
         data.append('file', fs.createReadStream(this.inputFileName), this.inputFileName.split('/').pop());
         data.append('uploadId', uploadId);
-        console.log(dokeBoss.remote + "/upload", uploadId);
+        //console.log(dokeBoss.remote + "/upload", uploadId);
         try {
             request = await axios.request({
                 method: 'post',
@@ -346,7 +346,7 @@ export default class dokeBoss extends dokeBossBase {
 
             return Buffer.from(request.data);
         } catch (e) {
-            console.log('error', e.response.status, e.response.statusText, e.message, e.response.data)
+            console.log('error', e.response?.status, e.response?.statusText, e.message)
             throw new Error('can not convert file with remote');
         }
 
