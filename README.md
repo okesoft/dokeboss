@@ -173,6 +173,7 @@ const data = await dokeBoss
 const extention = dokeBoss.getExtensionByMimeType('image/jpeg')//will return jpg or false
 const mime = dokeBoss.getMimeTypeByExtention('jpg')//will return image/jpg or false
 dokeBoss.setDownloadTimeout(15000)//will set timeout for download from link to 15 seconds.
+dokeBoss.setOperationTimeout(15000)//will set timeout for spawn operation (shell) globally for all modules.
 ```
 
 ## coverage
