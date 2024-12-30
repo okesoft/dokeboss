@@ -33,6 +33,11 @@ export class dokeBossApi {
             await this.stop();
         });
 
+        try {
+            fs.mkdirSync('./api/files', { recursive: true });
+        } catch (e) {
+
+        }
         //remove old files from path
         this.removeOldFiles();
 
