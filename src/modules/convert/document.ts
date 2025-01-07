@@ -1,4 +1,5 @@
 import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
+import getConfig from "../../cfg";
 
 export default class dokeBossDocumentConvertModule extends dokeBossModule {
 
@@ -10,7 +11,7 @@ export default class dokeBossDocumentConvertModule extends dokeBossModule {
         return async (inputFile, outputFile) => {
             return {
                 command: 'unoconvert',
-                args: ['--host-location', 'remote', inputFile, outputFile],
+                args: getConfig().GetUnoconvertCmdArgs(inputFile, outputFile),
                 timeout: 120000
             }
         }

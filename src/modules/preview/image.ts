@@ -1,4 +1,5 @@
 import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
+import getConfig from "../../cfg";
 
 export default class dokeBossImagePreviewModule extends dokeBossModule {
 
@@ -38,7 +39,7 @@ export default class dokeBossImagePreviewModule extends dokeBossModule {
             }
 
             return {
-                command: 'magick',
+                command: getConfig().ImagickCommand,
                 args
             }
         }

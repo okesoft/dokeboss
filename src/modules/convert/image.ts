@@ -1,4 +1,5 @@
 import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
+import getConfig from "../../cfg";
 
 export default class dokeBossImageConvertModule extends dokeBossModule {
 
@@ -9,7 +10,7 @@ export default class dokeBossImageConvertModule extends dokeBossModule {
     async convert(options: any, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         return async (inputFile, outputFile) => {
             return {
-                command: 'magick',
+                command: getConfig().ImagickCommand,
                 args: [inputFile, outputFile],
             }
         }

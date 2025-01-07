@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  unoserver:
+    image: ghcr.io/unoconv/unoserver-docker
+    container_name: unoserver
+    networks:
+      - dokeboss
+    ports:
+      - "2002:2002"
+    restart: unless-stopped
+
+#  dokeboss:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    networks:
+#      - dokeboss
+#    container_name: api-wrapper
+#    ports:
+#      - "5001:5001"
+#    depends_on:
+#      - unoserver
+#    restart: unless-stopped
+  dokeboss-dev:
+  # To run dokeboss-dev do the following:
+  # $ docker-compose up
+  # Login into dokeboss-dev container
+  # $ docker exec -it dokeboss-dev /bin/bash
+  # After log in run following:
+  # container $ rm -rf node_modules
+  # container $ npm install
+  # container $ npx puppeteer browsers install chrome
+  # container $ npx tsc
+  # to run server:
+  # container $ npm run serve
+  # to run tests
+  # container $ npx jest
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    networks:
+      - dokeboss
+    container_name: dokeboss-dev
+    ports:
+      - "5001:5001"
+    depends_on:
+      - unoserver
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+volumes:
+  data:
+
+networks:
+  dokeboss:

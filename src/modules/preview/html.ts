@@ -2,6 +2,7 @@ import spawn = require("await-spawn");
 import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
 import puppeteer from 'puppeteer';
 import fs from 'fs';
+import getConfig from "../../cfg";
 
 export default class dokeBossDocumentPreviewModule extends dokeBossModule {
 
@@ -31,7 +32,7 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
         await browser.close();
 
         try {
-            await spawn('magick', [outputPdfFile + "[0]", '-density', '500', '-trim', '-flatten', '-quality', '100', outputFile], { timeout: 15000 });
+            await spawn(getConfig().ImagickCommand, [outputPdfFile + "[0]", '-density', '500', '-trim', '-flatten', '-quality', '100', outputFile], { timeout: 15000 });
         } catch (e) {
             console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
