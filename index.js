@@ -99,7 +99,7 @@ async function main() {
         .to('./1.pdf', { width: 300, height: 300 })
         .convert()
 
-    console.log(data);
+    console.log(JSON.stringify(data));
 
 }
 

@@ -2,6 +2,7 @@ import { join } from "path";
 import dokeBoss, { dokeBossMode } from "./index";
 import fs from "fs";
 import dokeBossCallbackModule from "./callbackmodule";
+import getConfig from "./cfg";
 const spawn = require('await-spawn');
 
 export type dokeBossModuleCmd = { command: string, args?: string[], timeout?: number } | Buffer;
@@ -47,8 +48,7 @@ export default class dokeBossModule {
                 let { command, args, timeout } = res;
 
                 if (!args)
-                    args = [inputFile, outputFile];
-
+                    args = getConfig().GetUnoconvertCmdArgs(inputFile, outputFile);
                 if (this.debug)
                     console.log('doCmd debug >>', command, args.join(' '));
 

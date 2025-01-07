@@ -1,0 +1,14 @@
+FROM node:20.15
+
+RUN apt-get update && apt-get install -y imagemagick ffmpeg python3-pip python3-uno && apt-get clean
+RUN python3 -mpip install unoserver --break-system-packages
+
+
+#RUN mkdir -p /app
+WORKDIR /app
+#RUN rm -rf node_modules
+#RUN npm install
+#RUN npx puppeteer browsers install chrome
+#RUN npx tsc
+
+ENTRYPOINT ["/bin/bash", "-c", "while true; do sleep 60; done"]

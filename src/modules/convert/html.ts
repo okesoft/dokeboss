@@ -2,7 +2,7 @@ import dokeBossModule, { dokeBossModuleCmdCallback } from "../..//module";
 import puppeteer from 'puppeteer';
 import fs from 'fs';
 import spawn = require("await-spawn");
-import url from 'url';
+import getConfig from "../../cfg";
 
 export default class dokeBossHtmlConvertModule extends dokeBossModule {
 
@@ -32,7 +32,11 @@ export default class dokeBossHtmlConvertModule extends dokeBossModule {
         await browser.close();
 
         try {
-            await spawn('unoconvert', ['--host-location', 'remote', outputPdfFile, outputFile], { timeout: 150000 });
+            await spawn(
+                'unoconvert',
+                getConfig().GetUnoconvertCmdArgs(outputPdfFile, outputFile),
+                { timeout: 150000 }
+            );
         } catch (e) {
             console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
