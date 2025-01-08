@@ -27,7 +27,7 @@ services:
   # $ docker-compose up
   # Login into dokeboss-dev container
   # $ docker exec -it dokeboss-dev /bin/bash
-  # After log in run following:
+  # After log in run following (these commands should be normally done in Dockerfile, but as we mount directory to container - we cannot go this way):
   # container $ rm -rf node_modules
   # container $ npm install
   # container $ npx puppeteer browsers install chrome
