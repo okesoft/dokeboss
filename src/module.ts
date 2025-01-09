@@ -48,7 +48,7 @@ export default class dokeBossModule {
                 let { command, args, timeout } = res;
 
                 if (!args)
-                    args = getConfig().GetUnoconvertCmdArgs(inputFile, outputFile);
+                    args = command == 'unoconvert' ? getConfig().GetUnoconvertCmdArgs(inputFile, outputFile) : [inputFile, outputFile];
                 if (this.debug)
                     console.log('doCmd debug >>', command, args.join(' '));
 

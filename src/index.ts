@@ -55,10 +55,17 @@ export default class dokeBoss extends dokeBossBase {
         this.inputOriginalFileName = fileName;
         // if (!this.session)
         //     this.session = fs.mkdtempSync(join(tmpdir(), 'dokuboss-'));
+
+        try {
+            fs.mkdirSync('./data');
+        } catch (e) {
+
+        }
+
         if (!this.session) {
             this.session = fs.mkdtempSync(join('./data', 'dokuboss-'));
         }
-        console.log('Session: ', this.session)
+
         if (dokeBoss.globalModules.length) {
             for (let i in dokeBoss.globalModules) {
                 if (dokeBoss.globalModules[i].on == 'before')
