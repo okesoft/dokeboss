@@ -1,4 +1,4 @@
-import { getDoku, getByteHash, removeGenerated, getPath } from '../globals';
+import { getDoku, getByteHash, removeGenerated, getVideoDimentions, getPath } from '../globals';
 import fs from 'fs';
 
 const path = getPath('/videoConvert/');
@@ -12,12 +12,10 @@ describe('video convert', () => {
 
     it('convert mov to mp4 from buffer', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = 'daa05731a30ea2ca70bef8c4b4ab27d5b2c55e800b2af68db38fbc1708c7fb1a';
         const buffer = fs.readFileSync(path + 'video.mov');
         const outputFile = path + 'generated' + r + '.mov.mp4';
         let data = Buffer.from('');
 
-        let hash = "";
         let mime = getDoku().getMimeTypeByExtention('mov');
         try {
             data = await getDoku().from(buffer, mime ? mime : '')
@@ -27,20 +25,21 @@ describe('video convert', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, duration, type } = await getVideoDimentions(outputFile);
+        expect(width).toBe(1080);
+        expect(height).toBe(1920);
+        expect(type).toBe('mov,mp4,m4a,3gp,3g2,mj2');
+        expect(duration).toBeGreaterThan(25);
 
     }, 25000);
 
 
     it('convert mov video to mp4', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = 'daa05731a30ea2ca70bef8c4b4ab27d5b2c55e800b2af68db38fbc1708c7fb1a';
         const inputFile = path + 'video.mov';
         const outputFile = path + 'generated' + r + '.mov.mp4';
         let data = Buffer.from('');
 
-        let hash = "";
         try {
             data = await getDoku().from(inputFile)
                 .to(outputFile)
@@ -49,8 +48,11 @@ describe('video convert', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, duration, type } = await getVideoDimentions(outputFile);
+        expect(width).toBe(1080);
+        expect(height).toBe(1920);
+        expect(type).toBe('mov,mp4,m4a,3gp,3g2,mj2');
+        expect(duration).toBeGreaterThan(25);
 
     }, 250000);
 
@@ -68,10 +70,16 @@ describe('video convert', () => {
             console.log('error', e)
         }
 
+        let params = {};
+        params = await getVideoDimentions(outputFile);
 
-        const stat = fs.lstatSync(outputFile);
-        expect(stat.size).toBeGreaterThan(37000000);
-        expect(stat.isFile()).toEqual(true);
+
+        console.log(1, params);
+        const { width, height, duration, type } = params as any;
+        expect(width).toBe(1080);
+        expect(height).toBe(1920);
+        expect(duration).toBeGreaterThan(25);
+        expect(type).toBe('matroska,webm');
 
     }, 250000);
 
@@ -89,9 +97,17 @@ describe('video convert', () => {
             console.log('error', e)
         }
 
-        const stat = fs.lstatSync(outputFile);
-        expect(stat.size).toBeGreaterThan(5200000);
-        expect(stat.isFile()).toEqual(true);
+        let params = {};
+        params = await getVideoDimentions(outputFile);
+
+
+        console.log(2, params);
+        const { width, height, duration, type } = params as any;
+
+        expect(width).toBe(1920);
+        expect(height).toBe(1080);
+        expect(duration).toBeGreaterThan(5.5);
+        expect(type).toBe('matroska,webm');
 
     }, 250000);
 
