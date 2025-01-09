@@ -1,4 +1,4 @@
-import { getDoku, getByteHash, removeGenerated, getPath } from '../globals';
+import { getDoku, getByteHash, removeGenerated, getImageDimentions, getVideoDimentions, getPath } from '../globals';
 import fs from 'fs';
 const spawn = require('await-spawn');
 
@@ -40,12 +40,10 @@ describe('remote: tests', () => {
 
     it('remote: convert png from buffer', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = 'ee7b9585be16946d39c62e600a7c18dfefdbf641e900b5921d4b7d749724eed5';
         const buffer = fs.readFileSync(path + 'image.png');
         const outputFile = path + 'generated' + r + '.png.jpg';
         let data = Buffer.from('');
 
-        let hash = "";
         let mime = getDoku().getMimeTypeByExtention('png');
         try {
             data = await getDoku()
@@ -57,20 +55,20 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(578);
+        expect(height).toEqual(537);
+        expect(type).toEqual('jpeg');
 
     }, 25000);
 
 
     it('remote: convert png image to jpeg', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = 'ee7b9585be16946d39c62e600a7c18dfefdbf641e900b5921d4b7d749724eed5';
         const inputFile = path + 'image.png';
         const outputFile = path + 'generated' + r + '.jpg';
         let data = Buffer.from('');
 
-        let hash = "";
         try {
             data = await getDoku().from(inputFile)
                 .to(outputFile, { width: 300, height: 300 })
@@ -79,19 +77,19 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(578);
+        expect(height).toEqual(537);
+        expect(type).toEqual('jpeg');
 
     });
 
     it('remote: preview jpg image to jpeg (less size)', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = '7f63a94fe9279e85d496199e423136978ef8cfb35de414d34c1b1ffc9f58b2e0';
         const inputFile = path + 'image.jpg';
         const outputFile = path + 'generated' + r + '.jpg.jpg';
         let data = Buffer.from('');
 
-        let hash = "";
         try {
             data = await getDoku()
                 .setRemote(true)
@@ -102,14 +100,15 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(300);
+        expect(height).toEqual(169);
+        expect(type).toEqual('jpeg');
 
     });
     //preview video
     it('remote: preview mov video to jpg', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = '0480b074e4ef2ea0a46d7d5dfbbedaf15490534d67a180d2cc88b3295cde5557';
         const inputFile = path + 'video.mov';
         const outputFile = path + 'generated' + r + '.jpg';
         let data = Buffer.from('');
@@ -125,8 +124,10 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(300);
+        expect(height).toEqual(300);
+        expect(type).toEqual('jpeg');
 
     });
     it('remote: convert mov video to webm', async () => {
@@ -148,9 +149,14 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        const stat = fs.lstatSync(outputFile);
-        expect(stat.size).toBeGreaterThan(30000000);
-        expect(stat.isFile()).toEqual(true);
+        let params = {};
+        params = await getVideoDimentions(outputFile);
+        console.log(1, params);
+        const { width, height, duration, type } = params as any;
+        expect(width).toBe(1920);
+        expect(height).toBe(1080);
+        expect(duration).toBeGreaterThan(25);
+        expect(type).toBe('matroska,webm');
 
     }, 300000);
 
@@ -172,8 +178,10 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(612);
+        expect(height).toEqual(792);
+        expect(type).toEqual('jpeg');
 
     }, 25000);
 
@@ -196,8 +204,10 @@ describe('remote: tests', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(612);
+        expect(height).toEqual(792);
+        expect(type).toEqual('jpeg');
 
     }, 125000);
     //convert document

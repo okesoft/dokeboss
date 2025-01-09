@@ -1,4 +1,4 @@
-FROM node:20.15
+FROM --platform=linux/amd64 node:20.15
 
 RUN apt-get update && apt-get install -y git cmake make pkg-config x265 libtool build-essential curl ffmpeg python3-pip python3-uno ghostscript && apt-get clean
 RUN python3 -mpip install unoserver --break-system-packages
@@ -25,43 +25,43 @@ RUN export PKG_CONFIG_PATH=/usr/src:/usr/src/libheif:/usr/src/libde265:/usr/src/
 WORKDIR /usr/src
 RUN git clone --depth 1 --branch 7.1.1-43 https://github.com/ImageMagick/ImageMagick.git && \
     cd ImageMagick && ./configure \
-      --with-bzlib=yes \
-      --with-djvu=yes \
-      --with-dps=yes \
-      --with-fftw=yes \
-      --with-flif=yes \
-      --with-fontconfig=yes \
-      --with-fpx=yes \
-      --with-freetype=yes \
-      --with-gslib=yes \
-      --with-gvc=yes \
-      --with-heic=yes \
-      --with-jbig=yes \
-      --with-jemalloc=yes \
-      --with-jpeg=yes \
-      --with-jxl=yes \
-      --with-lcms=yes \
-      --with-lqr=yes \
-      --with-lzma=yes \
-      --with-magick-plus-plus=yes \
-      --with-openexr=yes \
-      --with-openjp2=yes \
-      --with-pango=yes \
-      --with-perl=yes \
-      --with-png=yes \
-      --with-raqm=yes \
-      --with-raw=yes \
-      --with-rsvg=yes \
-      --with-tcmalloc=yes \
-      --with-tiff=yes \
-      --with-webp=yes \
-      --with-wmf=yes \
-      --with-x=yes \
-      --with-xml=yes \
-      --with-zip=yes \
-      --with-zlib=yes \
-      --with-zstd=yes \
-      --with-gcc-arch=native && make -j 8 && make install && ldconfig /usr/local/lib
+    --with-bzlib=yes \
+    --with-djvu=yes \
+    --with-dps=yes \
+    --with-fftw=yes \
+    --with-flif=yes \
+    --with-fontconfig=yes \
+    --with-fpx=yes \
+    --with-freetype=yes \
+    --with-gslib=yes \
+    --with-gvc=yes \
+    --with-heic=yes \
+    --with-jbig=yes \
+    --with-jemalloc=yes \
+    --with-jpeg=yes \
+    --with-jxl=yes \
+    --with-lcms=yes \
+    --with-lqr=yes \
+    --with-lzma=yes \
+    --with-magick-plus-plus=yes \
+    --with-openexr=yes \
+    --with-openjp2=yes \
+    --with-pango=yes \
+    --with-perl=yes \
+    --with-png=yes \
+    --with-raqm=yes \
+    --with-raw=yes \
+    --with-rsvg=yes \
+    --with-tcmalloc=yes \
+    --with-tiff=yes \
+    --with-webp=yes \
+    --with-wmf=yes \
+    --with-x=yes \
+    --with-xml=yes \
+    --with-zip=yes \
+    --with-zlib=yes \
+    --with-zstd=yes \
+    --with-gcc-arch=native && make -j 8 && make install && ldconfig /usr/local/lib
 
 
 WORKDIR /app

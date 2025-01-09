@@ -183,7 +183,7 @@ describe('image preview', () => {
 
     it('preview of big image to small jpeg', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const inputFile = path + 'bigimage.jpg';
+        const inputFile = path + 'bigimage.png';
         const outputFile = path + 'generated' + r + '.small.jpg';
         let data = Buffer.from('');
 
@@ -196,8 +196,8 @@ describe('image preview', () => {
         }
 
         const { width, height, type } = await getImageDimentions(outputFile);
-        expect(width).toEqual(212);
-        expect(height).toEqual(300);
+        expect(width).toEqual(300);
+        expect(height).toEqual(169);
         expect(type).toEqual('jpeg');
 
     });

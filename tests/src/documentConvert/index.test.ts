@@ -1,5 +1,5 @@
 import exp from 'constants';
-import { getDoku, getByteHash, removeGenerated, getPath } from '../globals';
+import { getDoku, getByteHash, removeGenerated, getPath, getImageDimentions } from '../globals';
 import fs from 'fs';
 
 const path = getPath('/documentConvert/');
@@ -55,8 +55,6 @@ describe('document convert', () => {
         expect(stat.size).toBeGreaterThan(1000);
         expect(stat.size).toEqual(71784);//im not sure if this is the correct parameter to check
         expect(stat.isFile()).toEqual(true);
-        //hash = await getByteHash(data);
-        //expect(hash).toEqual(resultHash);
 
     });
 

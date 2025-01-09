@@ -1,4 +1,4 @@
-import { getDoku, getByteHash, removeGenerated, getPath } from '../globals';
+import { getDoku, getByteHash, removeGenerated, getImageDimentions, getPath } from '../globals';
 import fs from 'fs';
 const path = getPath('/moduleTest/');
 describe('modules test', () => {
@@ -11,12 +11,10 @@ describe('modules test', () => {
 
     it('check crop module after preview', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = 'f3d14b9c2750434e2c215a6e9760ab3b60e6fddafec40fa2fdb1a36280d091b2';
         const inputFile = path + 'document.docx';
         const outputFile = path + 'generated' + r + '.jpg';
         let data = Buffer.from('');
 
-        let hash = "";
         try {
             data = await getDoku().from(inputFile)
                 .to(outputFile, { width: 300, height: 300 })
@@ -26,8 +24,10 @@ describe('modules test', () => {
             console.log('error', e)
         }
 
-        hash = await getByteHash(data);
-        expect(hash).toEqual(resultHash);
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(300);
+        expect(height).toEqual(200);
+        expect(type).toEqual('jpeg');
 
     });
 

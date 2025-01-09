@@ -1,4 +1,4 @@
-import { getDoku, getByteHash, removeGenerated, getPath } from '../globals';
+import { getDoku, getByteHash, removeGenerated, getPath, getImageDimentions, } from '../globals';
 import fs from 'fs';
 
 const path = getPath('/imageConvert/');
@@ -51,6 +51,28 @@ describe('image convert', () => {
 
         hash = await getByteHash(data);
         expect(hash).toEqual(resultHash);
+
+    });
+
+    it('convert of big image png to cropped jpeg', async () => {
+        const r = parseInt("" + (Math.random() * 1000));
+        const inputFile = path + 'bigimage.png';
+        const outputFile = path + 'generated' + r + '.cropped.jpg';
+        let data = Buffer.from('');
+
+        try {
+            data = await getDoku().from(inputFile)
+                .to(outputFile)
+                .after('crop', { x: 2000, y: 2000, width: 1000, height: 1000 })
+                .convert();
+        } catch (e) {
+            console.log('error', e)
+        }
+
+        const { width, height, type } = await getImageDimentions(outputFile);
+        expect(width).toEqual(1000);
+        expect(height).toEqual(1000);
+        expect(type).toEqual('jpeg');
 
     });
 
