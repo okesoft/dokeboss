@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 node:20.15
 
-RUN apt-get update && apt-get install -y git cmake make pkg-config x265 libtool build-essential curl ffmpeg python3-pip python3-uno ghostscript && apt-get clean
+RUN apt-get update && apt-get install -y git cmake make pkg-config x265 libtool build-essential curl ffmpeg python3-pip python3-uno ghostscript libatk1.0-0 libatk-bridge2.0-0 libxdamage1 && apt-get clean
 RUN python3 -mpip install unoserver --break-system-packages
 
 WORKDIR /usr/src

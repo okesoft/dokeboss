@@ -16,7 +16,9 @@ export default class dokeBossHtmlConvertModule extends dokeBossModule {
         const outputFile = this.prepareFile(mimeType);
 
         const url_ = fs.readFileSync(inputFile, 'utf8');
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox']
+        });
         const page = await browser.newPage();
         await page.setViewport({ width: 1080, height: 1024 });
 
