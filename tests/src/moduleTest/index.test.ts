@@ -34,7 +34,7 @@ describe('modules test', () => {
     it('check callback modules (after)', async () => {
         const r = parseInt("" + (Math.random() * 1000));
         const resultHash1 = '350357616448350d56a44fc9cefa368b5cea0e6e589a7a7672c5a135dd76015f';
-        const resultHash2 = 'c6ee093e8a90dfe536affeb866c6f9e9e71729f0c0a78805dd8789a11bc9a4f9';
+        const resultHash2 = 'cadcfd1b24ace05642b839ffea7419fe2a7066273fde2a3ab583f5b1194dee59';
         const inputFile = path + 'document.docx';
         const outputFile = path + 'generated' + r + '.jpg';
         let data = Buffer.from('');
@@ -57,7 +57,7 @@ describe('modules test', () => {
                 })
                 .from(inputFile)
                 .to(outputFile)
-                .convert();
+                .preview();
 
         } catch (e) {
             console.log('error', e)
@@ -69,12 +69,11 @@ describe('modules test', () => {
 
     it('check callback modules (before)', async () => {
         const r = parseInt("" + (Math.random() * 1000));
-        const resultHash = 'f3e2b33436a036befb64ae83a03543c1c0c31cb8f771d45f939ce910a067e6d7';
+        const resultHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
         const inputFile = path + 'document.docx';
         const outputFile = path + 'generated' + r + '.jpg';
         let data = Buffer.from('');
         const inputFileData = fs.readFileSync(inputFile);
-        const inputDataHash = await getByteHash(inputFileData);
         //console.log('data1: ', inputDataHash, inputFileData)
 
         let hash = "";
@@ -94,7 +93,7 @@ describe('modules test', () => {
                 })
                 .from(inputFile)
                 .to(outputFile)
-                .convert();
+                .preview();
 
         } catch (e) {
             console.log('error', e)

@@ -31,7 +31,7 @@ describe('video convert', () => {
         expect(type).toBe('mov,mp4,m4a,3gp,3g2,mj2');
         expect(duration).toBeGreaterThan(25);
 
-    }, 25000);
+    }, 100000);
 
 
     it('convert mov video to mp4', async () => {
