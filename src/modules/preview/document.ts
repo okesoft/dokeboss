@@ -1,6 +1,7 @@
 import spawn = require("await-spawn");
 import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
 import getConfig from "../../cfg";
+import { dokeBossOptionsExtended } from "../..";
 
 export default class dokeBossDocumentPreviewModule extends dokeBossModule {
 
@@ -8,7 +9,7 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
         super('document-preview', 'preview', parent);
     }
 
-    async preview(options: any, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
+    async preview(options: dokeBossOptionsExtended, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         const inputFile = this.prepareFile(this.bufferMimeType, this.buffer);
         const outputPdfFile = this.prepareFile('application/pdf');
         const outputFile = this.prepareFile(mimeType);

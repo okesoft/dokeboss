@@ -1,15 +1,18 @@
 import commandExists from "command-exists";
 import fs from "fs";
+import { tmpdir } from 'os';
 
 type Config = {
     ImagickCommand: string
-    GetUnoconvertCmdArgs: (inputFile: string, outputFile: string) => Array<string>
+    GetUnoconvertCmdArgs: (inputFile: string, outputFile: string) => Array<string>,
+    sessionBasePath: string
 }
 function getConfig(): Config {
     if (!getConfig.__cfg) {
-        let cfg : Config = {
+        let cfg: Config = {
             ImagickCommand: 'convert',
-            GetUnoconvertCmdArgs: (inputFile, outputFile) => {return ['--host-location', 'remote', inputFile, outputFile]}
+            GetUnoconvertCmdArgs: (inputFile, outputFile) => { return ['--host-location', 'remote', inputFile, outputFile] },
+            sessionBasePath: tmpdir()
         }
         if (commandExists.sync('magick')) {
             cfg.ImagickCommand = 'magick'
@@ -18,7 +21,8 @@ function getConfig(): Config {
         }
 
         if (fs.existsSync("/.dockerenv")) {
-            cfg.GetUnoconvertCmdArgs = (inputFile, outputFile) => {return ['--host-location', 'remote', '--host', 'unoserver', inputFile, outputFile]}
+            cfg.GetUnoconvertCmdArgs = (inputFile, outputFile) => { return ['--host-location', 'remote', '--host', 'unoserver', inputFile, outputFile] }
+            cfg.sessionBasePath = './data';
         }
 
         getConfig.__cfg = cfg

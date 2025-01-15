@@ -1,3 +1,4 @@
+import { dokeBossOptions, dokeBossOptionsExtended } from "../..";
 import dokeBossModule, { dokeBossModuleCmdCallback } from "../../module";
 
 export default class dokeBossVideoPreviewModule extends dokeBossModule {
@@ -6,7 +7,7 @@ export default class dokeBossVideoPreviewModule extends dokeBossModule {
         super('video-preview', 'preview', parent);
     }
 
-    async preview(options: any, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
+    async preview(options: dokeBossOptionsExtended, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         this.debug = true;
         return async (inputFile, outputFile) => {
             const args = [
@@ -28,7 +29,7 @@ export default class dokeBossVideoPreviewModule extends dokeBossModule {
                     options.width +
                     ':' +
                     options.height +
-                    (options.forceAspect
+                    (options.videoForceAspect
                         ? ':force_original_aspect_ratio=decrease'
                         : '')
                 );

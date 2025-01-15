@@ -1,4 +1,3 @@
-import { tmpdir } from 'os';
 import fs from 'fs';
 import { join } from 'node:path';
 import db from './db';
@@ -6,6 +5,8 @@ import axios from 'axios';
 import FormData from 'form-data';
 const fg = require('fast-glob');
 import dokeBossBase, { dokeBossModuleList } from './base';
+import getConfig from "./cfg";
+import { spawn } from 'child_process'
 
 export type dokeBossMode = 'preview' | 'convert' | 'crop';
 export type dokeBossOptions = {
@@ -14,10 +15,15 @@ export type dokeBossOptions = {
     imageBlur?: boolean;
     //
     videoForceAspect?: boolean;
+    videoStreamable?: boolean;
+    videoWebmOptimized?: boolean;
     //
     width?: number,
     height?: number,
     quality?: number,
+}
+export type dokeBossOptionsExtended = dokeBossOptions & {
+    [key: string]: any
 }
 
 export default class dokeBoss extends dokeBossBase {
@@ -48,23 +54,14 @@ export default class dokeBoss extends dokeBossBase {
     protected outputImageBlur: any;
     protected outputVideoForceAspect: boolean = false;
     protected inputOriginalFileName: string | Buffer<ArrayBufferLike> = '';
+    protected videoStreamable: boolean = false;
+    protected videoWebmOptimized: boolean = false;
 
     constructor(fileName: string | Buffer, mimeType: string, modules: dokeBossModuleList[] = []) {
         super(modules);
 
         this.inputOriginalFileName = fileName;
-        // if (!this.session)
-        //     this.session = fs.mkdtempSync(join(tmpdir(), 'dokuboss-'));
-
-        try {
-            fs.mkdirSync('./data');
-        } catch (e) {
-
-        }
-
-        if (!this.session) {
-            this.session = fs.mkdtempSync(join('./data', 'dokuboss-'));
-        }
+        this.createSessionDirectory();
 
         if (dokeBoss.globalModules.length) {
             for (let i in dokeBoss.globalModules) {
@@ -168,6 +165,18 @@ export default class dokeBoss extends dokeBossBase {
         }
 
     }
+    protected createSessionDirectory() {
+        if (!this.session)
+            this.session = fs.mkdtempSync(join(getConfig().sessionBasePath, 'dokuboss-'));
+
+        if (!fs.existsSync(getConfig().sessionBasePath)) {//if we start from docker - use ./data for session, otherwise - tmpdir
+            try {
+                fs.mkdirSync(getConfig().sessionBasePath, { recursive: true });
+            } catch (e) {
+
+            }
+        }
+    }
     to(pathToFile: string, options: dokeBossOptions & { mimeType?: string } = {}, callback?: (obj: dokeBoss) => void): dokeBoss {
 
         if (!options)
@@ -242,6 +251,12 @@ export default class dokeBoss extends dokeBossBase {
         if (options.videoForceAspect)
             this.outputVideoForceAspect = options.videoForceAspect;
 
+        if (options.videoStreamable)
+            this.videoStreamable = options.videoStreamable;
+
+        if (options.videoWebmOptimized)
+            this.videoWebmOptimized = options.videoWebmOptimized;
+
         this.outputImageBlur = options.imageBlur ?? false;
 
         /* TODO: video to 10s gif preview
@@ -273,12 +288,13 @@ export default class dokeBoss extends dokeBossBase {
             imageAutorotate: this.outputImageAutorotate,
             imageBackground: this.outputImageBackground,
             imageBlur: this.outputImageBlur,
+            videoForceAspect: this.outputVideoForceAspect,
+            videoStreamable: this.videoStreamable,
+            videoWebmOptimized: this.videoWebmOptimized
         };
     }
     protected _createTempFileName(mimeType: string): string {
-        if (!this.session)
-            this.session = fs.mkdtempSync(join(tmpdir(), 'dokuboss-'));
-
+        this.createSessionDirectory();
         return dokeBoss.createTempFileName(this.session, mimeType);
     }
 
@@ -371,12 +387,12 @@ export default class dokeBoss extends dokeBossBase {
             return this.doRemote(Object.assign({}, this.getOptions(), options));
         }
 
-        await this.applyModules(options);
+        await this.applyModules(Object.assign({}, this.getOptions(), options));
 
         return this.getResult();
     }
 
-    async preview(options: any = {}): Promise<Buffer> {
+    async preview(options: dokeBossOptions & any = {}): Promise<Buffer> {
         this.mode = 'preview';
         if (!this.outputMimeType.startsWith('image/')) {
             throw new Error('outputMimeType must be image');
@@ -388,7 +404,7 @@ export default class dokeBoss extends dokeBossBase {
             return this.doRemote(Object.assign({}, this.getOptions(), options));
         }
 
-        await this.applyModules(options);
+        await this.applyModules(Object.assign({}, this.getOptions(), options));
 
         return this.getResult();
     }
@@ -418,7 +434,70 @@ export default class dokeBoss extends dokeBossBase {
     getOutputFileName(): string {
         return this.outputFileName;
     }
+    getVideoMoovDataOffsets(): Promise<{ type: string, offset: number | null, size: number }[]> {
+        return dokeBoss.getVideoMoovDataOffsets(this.inputFileName, this.inputMimeType);
+    }
+    /**
+     Streaming web sites recommend to upload videos with Fast Start enabled. 
+     This allows video playback to begin before the file has been completely downloaded.
+     Why ?
+     Normally, a MP4 file has all the metadata about all packets stored at the end of the file, in data units named atoms. 
+     The "mdat" atom is located before the "moov" atom. 
+     If the file is created by adding the -movflags faststart option to the ffmpeg command line, 
+     the "moov" atom is moved at the beginning of the MP4 file during the ffmpeg second pass. 
+     By using this option, the "moov" atom is located before the "mdat" atom.
+     In other words, the file is enabled for Fast Start playback only when the "moov" atom is located before the "mdat" atom.
+     */
+    async isStreamable(): Promise<boolean> {
+        const arr = await dokeBoss.getVideoMoovDataOffsets(this.inputFileName, this.inputMimeType);
+        if (arr[0].type == 'moov' && arr[0].offset < 100) {
+            //moov data means moov before mdat, fast start means moov data is at the beginning of the file (offset less then 100 bytes). 
+            return true;
+        }
 
+        return false;
+    }
+    static async isStreamable(pathToFile: string | Buffer, mimeType?: string): Promise<boolean> {
+        const doke = dokeBoss.from(pathToFile, mimeType);
+        return doke.isStreamable();
+    }
+    static async getVideoMoovDataOffsets(path: string, mimeType: string): Promise<{ type: string, offset: number | null, size: number }[]> {
+        if (!mimeType.startsWith('video/'))
+            throw new Error('isStreamable available only for videos');
+
+        return new Promise((resolve, reject) => {
+
+            const grep = spawn('grep', ["-e", "type:'mdat'", "-e", "type:'moov'"]);
+            const ps = spawn('ffmpeg', ['-v', 'trace', '-i', path]);
+
+            ps.stderr.pipe(grep.stdin);
+
+            grep.stdout.on('data', function (data) {
+                const list = data.toString('utf8').trim().split('\n').map(line => line.trim());
+                const arr: { type: string, offset: number, size: number }[] = [];
+                for (let line of list) {
+                    const match = /\]\s*type\:\'(.*?)\'.*sz\:\s*(.*)/g.exec(line);
+                    const [size, offset] = match ? match[2].split(' ') : '';
+                    arr.push({
+                        type: match ? match[1] : '',
+                        size: parseInt(size) || 0,
+                        offset: parseInt(offset) || null
+                    });
+                }
+
+                resolve(arr)
+            });
+
+            grep.stderr.on('data', function (data) {
+                reject('can not find moov data');
+            });
+
+            setTimeout(() => {
+                reject('timeout');
+            }, 10000);
+
+        });
+    }
     static setOperationTimeout(timeout: number): typeof dokeBoss {
         dokeBoss.timeout = timeout;
         return dokeBoss;
