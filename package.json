@@ -1,5 +1,5 @@
 {
-  "name": "dokeboss",
+  "name": "@okesoft/dokeboss",
   "version": "1.0.0",
   "description": "convert and preview a lot of types of document/image/video. Using ffmpeg, imagemagick and unoserver. Check moov atoming.",
   "keywords": [
