@@ -1,7 +1,7 @@
 {
   "name": "dokeboss",
   "version": "1.0.0",
-  "description": "convert and preview of any types of document. Using ffmpeg, imagemagick and unoserver",
+  "description": "convert and preview a lot of types of document/image/video. Using ffmpeg, imagemagick and unoserver. Check moov atoming.",
   "keywords": [
     "document preview",
     "document convert",
@@ -30,11 +30,6 @@
     "type": "git",
     "url": "git+https://github.com/okesoft/dokeboss.git"
   },
-  "keywords": [
-    "document",
-    "preview",
-    "convert"
-  ],
   "author": "gettocat",
   "license": "MIT",
   "bugs": {
