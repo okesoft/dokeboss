@@ -83,7 +83,7 @@ export class dokeBossApi {
             let uploadId = require('crypto')
                 .createHash('sha256')
                 .update(content)
-                .update(req.body.options)
+                .update(req.body.options ?? "")
                 .digest('hex');
             let uploadPath = './api/files/' + uploadId + "." + dokeBoss.getExtensionByMimeType(file.mimetype);
 
@@ -110,6 +110,46 @@ export class dokeBossApi {
                 return res.status(500).send(e);
             }
 
+        });
+
+        this.app.post('/check', async function (req, res, next) {
+            console.log('request new check', req.body, req.files?.length)
+
+            if (!req.body.method || !['isStreamable'].includes(req.body.method)) {
+                return res.status(400).send({ error: 'Invalid method' });
+            }
+
+            if (!req.files || Object.keys(req.files).length === 0) {
+                return res.status(400).send({ error: 'No files were uploaded.' });
+            }
+
+            let file = req.files.file;
+            let content = fs.readFileSync(file.tempFilePath, { encoding: 'binary' });
+            let uploadId = require('crypto')
+                .createHash('sha256')
+                .update(content)
+                .update(req.body.options ?? "")
+                .digest('hex');
+            let uploadPath = './api/files/' + uploadId + "." + dokeBoss.getExtensionByMimeType(file.mimetype);
+
+            console.log('uploadId', uploadId);
+            try {
+                fs.writeFileSync("./api/files/convert-" + uploadId + ".json", JSON.stringify(req.body));
+                fs.writeFileSync(uploadPath, content, { encoding: 'binary' });
+            } catch (e) {
+                console.log('write source file error', e);
+            }
+
+            const doke = dokeBoss
+                .from(file.tempFilePath, file.mimetype);
+            try {
+                const response = await doke[req.body.method]();
+                console.log(response)
+                return res.json({ result: response });
+            } catch (e) {
+                console.log('error', e);
+                return res.status(500).json({ result: false });
+            }
         });
 
         this.app.get('/download', function (req, res) {

@@ -180,8 +180,8 @@ describe('remote: tests', () => {
         }
 
         const { width, height, type } = await getImageDimentions(outputFile);
-        expect(width).toEqual(612);
-        expect(height).toEqual(792);
+        expect(width).toEqual(232);
+        expect(height).toEqual(300);
         expect(type).toEqual('jpeg');
 
     }, 25000);
@@ -206,8 +206,8 @@ describe('remote: tests', () => {
         }
 
         const { width, height, type } = await getImageDimentions(outputFile);
-        expect(width).toEqual(612);
-        expect(height).toEqual(792);
+        expect(width).toEqual(232);
+        expect(height).toEqual(300);
         expect(type).toEqual('jpeg');
 
     }, 125000);
@@ -258,6 +258,42 @@ describe('remote: tests', () => {
         const stat = fs.lstatSync(outputFile);
         expect(stat.size).toBeGreaterThan(50000);
         expect(stat.isFile()).toEqual(true);
+
+    }, 25000);
+
+    it('remote: isStreamable:false', async () => {
+        const buffer = fs.readFileSync(path + '../videoConvert/video.mp4');
+        let mime = getDoku().getMimeTypeByExtention('mp4');
+        let res: boolean | null = null;
+        try {
+            res = await getDoku()
+                .setRemote(true)
+                .from(buffer, mime ? mime : '')
+                .isStreamable();
+        } catch (e) {
+            console.log('error', e)
+        }
+
+
+        expect(res).toEqual(false);
+
+    }, 25000);
+
+    it('remote: isStreamable:true', async () => {
+        const buffer = fs.readFileSync(path + '../videoConvert/streamable.mp4');
+        let mime = getDoku().getMimeTypeByExtention('mp4');
+        let res: boolean | null = null;
+        try {
+            res = await getDoku()
+                .setRemote(true)
+                .from(buffer, mime ? mime : '')
+                .isStreamable();
+        } catch (e) {
+            console.log('error', e)
+        }
+
+
+        expect(res).toEqual(true);
 
     }, 25000);
 

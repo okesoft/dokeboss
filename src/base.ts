@@ -12,7 +12,8 @@ export type dokeBossModuleList = {
 
 export default class dokeBossBase {
     protected modules: { [key: string]: dokeBossModuleList[] } = {};
-    protected afterList: { mode: dokeBossMode, options: any }[] = [];
+    protected afterList: { mode?: dokeBossMode, options: any, callback?: (options: any, mimeType: string) => dokeBossModuleCmdCallback }[] = [];
+    protected beforeList: { mode?: dokeBossMode, options: any, callback?: (options: any, mimeType: string) => dokeBossModuleCmdCallback }[] = [];
 
     constructor(modules: dokeBossModuleList[] = []) {
         for (let module of modules) {
@@ -20,7 +21,7 @@ export default class dokeBossBase {
         }
     }
 
-    public addModule(module: dokeBossModuleList): ThisParameterType<dokeBossBase> {
+    public addModule(module: dokeBossModuleList, toStart = false): ThisParameterType<dokeBossBase> {
         const { mimeType, file, callback, mode } = module;
 
         if (!file && (!callback || !(callback instanceof Function))) {
@@ -59,10 +60,18 @@ export default class dokeBossBase {
 
             if (!(mimeType instanceof RegExp)) {
                 for (let mt of mimeType) {
-                    data[mt].push(obj);
+                    if (toStart) {
+                        data[mt].unshift(obj);
+                    } else {
+                        data[mt].push(obj);
+                    }
                 }
             } else {
-                data[mimeType.source].push(obj);
+                if (toStart) {
+                    data[mimeType.source].unshift(obj);
+                } else {
+                    data[mimeType.source].push(obj);
+                }
             }
 
             this.modules = data;
@@ -91,8 +100,20 @@ export default class dokeBossBase {
 
         return buffer;
     }
-    after(mode: dokeBossMode, options: any): dokeBossBase {
-        this.afterList.push({ mode, options });
+    after(mode: dokeBossMode | ((options: any, mimeType: string) => dokeBossModuleCmdCallback), options: any = {}): dokeBossBase {
+        if (mode instanceof Function) {
+            this.afterList.push({ callback: mode, options });
+        } else {
+            this.afterList.push({ mode, options });
+        }
+        return this;
+    }
+    before(mode: dokeBossMode | ((options: any, mimeType: string) => dokeBossModuleCmdCallback), options: any = {}): dokeBossBase {
+        if (mode instanceof Function) {
+            this.beforeList.push({ callback: mode, options });
+        } else {
+            this.beforeList.push({ mode, options });
+        }
         return this;
     }
 

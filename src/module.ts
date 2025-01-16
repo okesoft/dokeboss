@@ -40,9 +40,9 @@ export default class dokeBossModule {
         const outputFile = this.prepareFile(mimeType);
 
         try {
-            let res: dokeBossModuleCmd = await callback(inputFile, outputFile);
+            let res: dokeBossModuleCmd | Buffer = await callback(inputFile, outputFile);
             if (res instanceof Buffer) {
-                fs.writeFileSync(outputFile, res);
+                fs.writeFileSync(outputFile, res, { flag: 'w', encoding: 'binary' });
                 return res;
             } else if ('command' in res) {
                 let { command, args, timeout } = res;

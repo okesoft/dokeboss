@@ -11,6 +11,7 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
 
     async preview(options: dokeBossOptionsExtended, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         const inputFile = this.prepareFile(this.bufferMimeType, this.buffer);
+
         const outputPdfFile = this.prepareFile('application/pdf');
         const outputFile = this.prepareFile(mimeType);
 
@@ -22,11 +23,39 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
         } catch (e) {
             console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
             this.error = e;
-            throw new Error('can not preview document');
+            //throw new Error('can not preview document');
         }
 
         try {
-            await spawn(getConfig().ImagickCommand, [outputPdfFile + "[0]", '-density', '150', '-trim', '-flatten', '-quality', '100', '-sharpen', '0x1.0', outputFile], { timeout: 15000 });
+            const args = [outputPdfFile + "[0]", '-density', '150', '-trim', '-flatten', '-quality', '100', '-sharpen', '0x1.0', outputFile];
+            if (options.width > 0) {
+                args.splice(
+                    1,
+                    0,
+                    '-resize',
+                    options.width + 'x' + (options.height && options.height > 0 ? options.height : '')
+                );
+            }
+
+            if (options.imageAutorotate) {
+                args.splice(1, 0, '-auto-orient');
+            }
+
+            if (options.quality) {
+                args.splice(1, 0, '-quality', "" + options.quality);
+            }
+
+            if (options.imageBackground) {
+                args.splice(1, 0, '-background', options.imageBackground);
+                args.splice(1, 0, '-flatten');
+            }
+
+            if (options.imageBlur) {
+                args.splice(1, 0, '-blur', '0x8');
+            }
+
+            //console.log('args', args)
+            await spawn(getConfig().ImagickCommand, args, { timeout: this.timeout });
 
             return this.fileContent(outputFile);
         } catch (e) {

@@ -18,7 +18,7 @@ export default class dokeBossImagePreviewModule extends dokeBossModule {
                     1,
                     0,
                     '-resize',
-                    options.width + 'x' + options.height
+                    options.width + 'x' + (options.height && options.height > 0 ? options.height : '')
                 );
             }
 

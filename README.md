@@ -57,6 +57,25 @@ const data = await dokeBoss.from('./test.mov')
         .preview({ quality: 40 })       
 ```
 
+also for videos is available check for streamable content (http 206):
+```ts
+//its also available with remote mode.
+const flag = await dokeBoss.setRemote(true).isStreamable('video.mp4');
+const flag = await dokeBoss.fromUrl("http://...").isStreamable();
+const flag = await dokeBoss.from("../video.mov").isStreamable();
+const flag = await dokeBoss.fromBuffer(Buffer.from('')).isStreamable();
+```
+
+for the video convertation also available next flags:
+```ts
+const data = await dokeBoss.from('./test.mov')
+        .to('./preview_video.webp',{ 
+                videoStreamable: true,//its make video streamable (move moov atoms to the start of the file. Its makes mp4 avvailable to stream with http protocol)
+                videoWebmOptimized: true// its works only for webm files. Will make webm video more optimized with two pass ffmpeg analysis of file. (its slowly to convert)
+          })
+        .convert()    
+```
+
 **Documents**
 
 ```typescript
@@ -165,8 +184,38 @@ const data = await dokeBoss
         })
         .from('./test.png')
         .to('./test2.jpg')
-        .convert();
+        .convert(); 
 ```
+
+**before/after**
+actually its just a alias for callback module, can be invoked before/after convertation/preview.
+
+```typescript
+data = await getDoku()
+        .from(inputFile)
+        .to(outputFile, { width: 300 })
+        .before((options: any, mimeType: string) => async (_inputFile, _outputFile) => {
+        const data = fs.readFileSync(inputFile);
+        //do something with inputFile data and put to outPutFile as buffer or return buffer.
+        //it will invoke before convertation chain
+        return Buffer.from(data).reverse();
+        })
+        .preview();
+
+
+data = await getDoku()
+        .from(inputFile)
+        .to(outputFile, { width: 300 })
+        .after((options: any, mimeType: string) => async (_inputFile, _outputFile) => {
+        const data = fs.readFileSync(inputFile);
+        //do something with inputFile data and put to outPutFile as buffer or return buffer.
+        //it will invoke after convertation chain
+        return Buffer.from(data).reverse();
+        })
+        .preview();
+```
+
+
 
 **Special methods**
 ```typescript
@@ -199,6 +248,7 @@ Now implemented and tested next types of documents (both convert and preview):
 **Documents**
 
 - application/pdf
+- text/html
 - doc
 - docx
 - xls
@@ -211,8 +261,15 @@ Can also make site preview, download file / text/html from url, make bulk conver
 
 ## installation
 
-install ffmpeg, imagemagick and docker contrainer with unoserver
+install ffmpeg with webm support, imagemagick (7+) with webp and HEIC support. And docker contrainer with unoserver
 ```
 apt-get install ffmpeg imagemagick
 docker run -p 2003:2003 ghcr.io/unoconv/unoserver-docker
 ```
+
+## docker installation
+
+
+## tests
+
+`npx jest .` from the root directory.

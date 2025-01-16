@@ -22,7 +22,7 @@ function getConfig(): Config {
 
         if (fs.existsSync("/.dockerenv")) {
             cfg.GetUnoconvertCmdArgs = (inputFile, outputFile) => { return ['--host-location', 'remote', '--host', 'unoserver', inputFile, outputFile] }
-            cfg.sessionBasePath = './data';
+            cfg.sessionBasePath = process.cwd() + '/data';
         }
 
         getConfig.__cfg = cfg

@@ -7,6 +7,7 @@ const fg = require('fast-glob');
 import dokeBossBase, { dokeBossModuleList } from './base';
 import getConfig from "./cfg";
 import { spawn } from 'child_process'
+import dokeBossCallbackModule from './callbackmodule';
 
 export type dokeBossMode = 'preview' | 'convert' | 'crop';
 export type dokeBossOptions = {
@@ -141,7 +142,7 @@ export default class dokeBoss extends dokeBossBase {
 
         this.inputMimeType = mimeType;
 
-        if (fileName.indexOf('http:') != -1 || fileName.indexOf('https:') != -1) {
+        if (fileName.indexOf('http:') == 0 || fileName.indexOf('https:') == 0) {
             this.fromUrl = true;
             this.inputFileName = this._createTempFileName(this.inputMimeType);
             if (this.inputMimeType == 'text/html') {
@@ -177,7 +178,7 @@ export default class dokeBoss extends dokeBossBase {
             }
         }
     }
-    to(pathToFile: string, options: dokeBossOptions & { mimeType?: string } = {}, callback?: (obj: dokeBoss) => void): dokeBoss {
+    to(pathToFile: string, options: dokeBossOptionsExtended & { mimeType?: string } = {}, callback?: (obj: dokeBoss) => void): dokeBoss {
 
         if (!options)
             options = {};
@@ -217,7 +218,7 @@ export default class dokeBoss extends dokeBossBase {
         callback(this);
         return this;
     }
-    toBuffer(mimeType: string, options?: dokeBossOptions): dokeBoss {
+    toBuffer(mimeType: string, options?: dokeBossOptionsExtended): dokeBoss {
         if (!mimeType)
             throw new Error('mimeType is required');
 
@@ -378,7 +379,36 @@ export default class dokeBoss extends dokeBossBase {
 
     }
 
-    async convert(options: any = {}): Promise<Buffer> {
+    async doRemoteCheck(method: string, options: any = {}): Promise<boolean> {
+        let request: any = {};
+        const data = new FormData();
+        const uploadId = require('crypto')
+            .createHash('sha256')
+            .update(fs.readFileSync(this.inputFileName, { flag: 'r', encoding: 'binary' }))
+            .update(JSON.stringify(options))
+            .digest('hex');
+
+        data.append('method', method);
+        data.append('file', fs.createReadStream(this.inputFileName), this.inputFileName.split('/').pop());
+        data.append('uploadId', uploadId);
+
+        try {
+            request = await axios.request({
+                method: 'post',
+                url: dokeBoss.remote + "/check",
+                data,
+                timeout: dokeBoss.timeout,
+                responseType: 'json'
+            });
+
+            return request.data.result;
+        } catch (e) {
+            console.log('error', e.response?.status, e.response?.statusText, e.message)
+            throw new Error('can not check file with remote');
+        }
+    }
+
+    async convert(options: dokeBossOptionsExtended = {}): Promise<Buffer> {
         this.mode = 'convert';
 
         await this.downloadFile();
@@ -392,7 +422,7 @@ export default class dokeBoss extends dokeBossBase {
         return this.getResult();
     }
 
-    async preview(options: dokeBossOptions & any = {}): Promise<Buffer> {
+    async preview(options: dokeBossOptionsExtended = {}): Promise<Buffer> {
         this.mode = 'preview';
         if (!this.outputMimeType.startsWith('image/')) {
             throw new Error('outputMimeType must be image');
@@ -411,16 +441,43 @@ export default class dokeBoss extends dokeBossBase {
 
     async applyModules(options: any): Promise<Buffer> {
         let buffer: Buffer = fs.readFileSync(this.inputFileName, { flag: 'r' });
-        const res = await super.applyModules(this.inputMimeType, buffer, this.mode, options);
-        let buff = res;
+        let buff = buffer;
+
+        for (let i in this.beforeList) {
+            const { mode, options, callback } = this.beforeList[i];
+
+            if (callback && callback instanceof Function) {
+                const obj = new dokeBossCallbackModule(mode, callback, this);
+                const tmp = await obj.run(buff, this.inputMimeType, mode, options);
+                if (!tmp) {
+                    console.error('error in module ' + obj.moduleName, obj.getError().stderr?.toString() ?? obj.getError().message);
+                } else {
+                    buff = tmp;
+                }
+            } else {
+                buff = await super.applyModules(this.inputMimeType, buff, mode, options);
+            }
+        }
+
+        buff = await super.applyModules(this.inputMimeType, buff, this.mode, options);
 
         for (let i in this.afterList) {
-            const { mode, options } = this.afterList[i];
-            buff = await super.applyModules(this.outputMimeType, buff, mode, options);
+            const { mode, options, callback } = this.afterList[i];
+            if (callback && callback instanceof Function) {
+                const obj = new dokeBossCallbackModule(mode, callback, this);
+                const tmp = await obj.run(buffer, this.inputMimeType, mode, options);
+                if (!tmp) {
+                    console.error('error in module ' + obj.moduleName, obj.getError().stderr?.toString() ?? obj.getError().message);
+                } else {
+                    buff = tmp;
+                }
+            } else {
+                buff = await super.applyModules(this.outputMimeType, buff, mode, options);
+            }
         }
 
         fs.writeFileSync(this.outputFileName, buff, { flag: 'w', encoding: 'binary' });
-        return res;
+        return buff;
     }
 
     async getResult(): Promise<Buffer> {
@@ -449,6 +506,13 @@ export default class dokeBoss extends dokeBossBase {
      In other words, the file is enabled for Fast Start playback only when the "moov" atom is located before the "mdat" atom.
      */
     async isStreamable(): Promise<boolean> {
+
+        await this.downloadFile();
+
+        if (dokeBoss.remote) {
+            return this.doRemoteCheck('isStreamable');
+        }
+
         const arr = await dokeBoss.getVideoMoovDataOffsets(this.inputFileName, this.inputMimeType);
         if (arr[0].type == 'moov' && arr[0].offset < 100) {
             //moov data means moov before mdat, fast start means moov data is at the beginning of the file (offset less then 100 bytes). 
@@ -610,6 +674,10 @@ export default class dokeBoss extends dokeBossBase {
 
     static addModule(module: dokeBossModuleList): typeof dokeBoss {
         dokeBoss.globalModules.push(module);
+        return dokeBoss;
+    }
+    static unloadModules(): typeof dokeBoss {
+        dokeBoss.globalModules = [];
         return dokeBoss;
     }
 }

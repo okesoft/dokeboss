@@ -92,15 +92,21 @@ async function main() {
         .to('./1.png', { width: 300, height: 300 })
         .preview()*/
 
-    const data = await dokeBoss
+    /*const data = await dokeBoss
         .setOperationTimeout(90000)
         .setRemote(true)//will send request to localhost:5001
         .from('http://google.com')
         .to('./1.pdf', { width: 300, height: 300 })
         .convert()
+    */
 
-    console.log(JSON.stringify(data));
-
+    /*const res = await dokeBoss
+        .setOperationTimeout(90000)
+        .setRemote(true)
+        .from('./tests/src/videoConvert/streamable.mp4')
+        .isStreamable();
+    console.log(JSON.stringify(res));
+    */
 }
 
 
