@@ -135,8 +135,6 @@ data
 .idea
 *.iml
 src
-Dockerfile*
-docker-*
 tsconfig*
 jest*
 tests

@@ -13,6 +13,9 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "files": [
+    "Dockerfile",
+    "Dockerfile-dev",
+    "docker-compose.yaml",
     "build"
  ],
  "bin": {
