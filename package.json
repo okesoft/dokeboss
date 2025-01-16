@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npx tsc",
     "serve": "node ./build/api.js",
-    "test": "jest ./tests"
+    "test": "jest -i"
   },
   "repository": {
     "type": "git",

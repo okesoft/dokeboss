@@ -57,8 +57,8 @@ describe('video convert', () => {
     }, 250000);
 
 
-    //this test is not work correctly in docker.
-    /*it('convert mov video to webm', async () => {
+    //next two test is not work correctly in docker.
+    it('convert mov video to webm', async () => {
         const r = parseInt("" + (Math.random() * 1000));
         const inputFile = path + 'video.mov';
         const outputFile = path + 'generated' + r + '.mov.webm';
@@ -83,7 +83,7 @@ describe('video convert', () => {
         expect(duration).toBeGreaterThan(25);
         expect(type).toBe('matroska,webm');
 
-    }, 250000);
+    }, 600000);
 
     it('convert mp4 video to webm', async () => {//this is so sloow test. mp4 -> webm is slow operation
         const r = parseInt("" + (Math.random() * 1000));
@@ -111,6 +111,6 @@ describe('video convert', () => {
         expect(duration).toBeGreaterThan(5.5);
         expect(type).toBe('matroska,webm');
 
-    }, 250000);
-    */
+    }, 300000);
+
 });
