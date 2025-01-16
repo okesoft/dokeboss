@@ -31,9 +31,9 @@ const data = await dokeBoss.from('./test.png')
 const data = await dokeBoss.from('./test.png')
         .to('./preview.jpg', { width: 300, height: 300 })
         .preview({ 
-            blur: true,
+            imageBlur: true,
             //quality: 0-100, quality of result image
-            //background: 'white' //background of transpanent image to jpg (will add white background)
+            //imageBackground: 'white' //background of transpanent image to jpg (will add white background)
         })       
 ```
 
@@ -48,7 +48,7 @@ const data = await dokeBoss.from('./test.mov')
 //preview of video with blur filter
 const data = await dokeBoss.from('./test.mov')
         .to('./preview_video.jpg', { width: 300, height: 600, videoForceAspect: true })
-        .preview({ blur: true });
+        .preview({ imageBlur: true });
 
 //preview of video with crop image after
 const data = await dokeBoss.from('./test.mov')
@@ -195,10 +195,10 @@ data = await getDoku()
         .from(inputFile)
         .to(outputFile, { width: 300 })
         .before((options: any, mimeType: string) => async (_inputFile, _outputFile) => {
-        const data = fs.readFileSync(inputFile);
-        //do something with inputFile data and put to outPutFile as buffer or return buffer.
-        //it will invoke before convertation chain
-        return Buffer.from(data).reverse();
+                const data = fs.readFileSync(inputFile);
+                //do something with inputFile data and put to outPutFile as buffer or return buffer.
+                //it will invoke before convertation chain
+                return Buffer.from(data).reverse();
         })
         .preview();
 
@@ -208,9 +208,9 @@ data = await getDoku()
         .to(outputFile, { width: 300 })
         .after((options: any, mimeType: string) => async (_inputFile, _outputFile) => {
         const data = fs.readFileSync(inputFile);
-        //do something with inputFile data and put to outPutFile as buffer or return buffer.
-        //it will invoke after convertation chain
-        return Buffer.from(data).reverse();
+                //do something with inputFile data and put to outPutFile as buffer or return buffer.
+                //it will invoke after convertation chain
+                return Buffer.from(data).reverse();
         })
         .preview();
 ```
@@ -272,4 +272,4 @@ docker run -p 2003:2003 ghcr.io/unoconv/unoserver-docker
 
 ## tests
 
-`npx jest .` from the root directory.
+`npx jest -i` from the root directory.
