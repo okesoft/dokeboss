@@ -1,8 +1,23 @@
 {
   "name": "dokeboss",
   "version": "1.0.0",
-  "description": "convert and preview of any types of document",
-  "main": "index.js",
+  "description": "convert and preview of any types of document. Using ffmpeg, imagemagick and unoserver",
+  "keywords": [
+    "document preview",
+    "document convert",
+    "site preview",
+    "pdf preview",
+    "video preview",
+    "video convert"
+  ],
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build"
+ ],
+ "bin": {
+   "dokeboss-api": "build/api.js"
+ },
   "directories": {
     "test": "tests"
   },
@@ -13,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gettocat/dokeboss.git"
+    "url": "git+https://github.com/okesoft/dokeboss.git"
   },
   "keywords": [
     "document",
@@ -23,9 +38,9 @@
   "author": "gettocat",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gettocat/dokeboss/issues"
+    "url": "https://github.com/okesoft/dokeboss/issues"
   },
-  "homepage": "https://github.com/gettocat/dokeboss#readme",
+  "homepage": "https://github.com/okesoft/dokeboss#readme",
   "dependencies": {
     "@types/command-exists": "^1.2.3",
     "await-spawn": "^4.0.2",

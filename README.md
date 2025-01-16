@@ -146,6 +146,9 @@ await getDoku()
         .convert();
 ```
 
+remote can be started with cli:
+`npx dokeboss-api`
+
 remote script have next env variables:
 ```
 DOKEBOSS_API_HOST - host of server, default is 127.0.0.1
