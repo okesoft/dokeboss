@@ -161,7 +161,7 @@ DOKEBOSS_API_FILEUPLOAD_TIMEOUT - upload timeout, default is 120000 (120 sec)
 
 also you can run remote script in docker with all depedencies:
 ```
-//TODO docker run command
+$ docker-compose up
 ```
 
 **callbacks modules**
@@ -272,7 +272,30 @@ docker run -p 2003:2003 ghcr.io/unoconv/unoserver-docker
 
 ## docker installation
 
+There are two options for Docker execution. Release version uses tag 1.0.1 to build image
+named dokeboss-api (you can replace version in Dockerfile if you need to). In case you want to develop or debug application 
+you should use dokeboss-dev version, which reflects current working directory into Docker image.
+
+### Release image
+To build and run release image simply use `docker-compose up`. Docker will download or build required images
+and server will be available on port 5001.
+
+### Developer image
+To build developer image of dokeboss you should comment out dokeboss section in docker-compose.yaml, and uncomment
+dokeboss-dev. After running docker-compose up, you will have unoserver image that performs office documents convertation
+and dokeboss-dev image that contains code for Dokeboss. To make it run please use following command:
+```bash
+HOST_MACHINE $ docker exec -it dokeboss-dev /bin/bash
+
+container $ rm -rf node_modules # Just in case, to avoid imcompatibility issues between host and container machine
+container $ npm install
+container $ npx puppeteer browsers install chrome
+container $ npx tsc
+```
+This magic is required due to /app folder availability only in runtime, when image is built we cannot perform any
+operations on it.
 
 ## tests
 
-`npx jest -i` from the root directory.
+`npx jest -i` from the root directory. Due to resource limitations of Docker we force sequental test 
+execution, to make sure all works smoothly
