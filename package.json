@@ -27,7 +27,7 @@
   "scripts": {
     "build": "npx tsc",
     "serve": "node ./build/api.js",
-    "test": "jest -i"
+    "test": "npx jest -i"
   },
   "repository": {
     "type": "git",
