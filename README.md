@@ -161,7 +161,7 @@ DOKEBOSS_API_FILEUPLOAD_TIMEOUT - upload timeout, default is 120000 (120 sec)
 
 also you can run remote script in docker with all depedencies:
 ```
-//TODO docker run command
+$ docker-compose up
 ```
 
 **callbacks modules**
@@ -272,9 +272,9 @@ docker run -p 2003:2003 ghcr.io/unoconv/unoserver-docker
 
 ## docker installation
 
-There are two options for Docker execution. Release version uses currently checked out branch to build image
-named dokeboss-api. In case you want to develop or debug application you should use dokeboss-dev version, which
-reflects current working directory into Docker image.
+There are two options for Docker execution. Release version uses tag 1.0.1 to build image
+named dokeboss-api (you can replace version in Dockerfile if you need to). In case you want to develop or debug application 
+you should use dokeboss-dev version, which reflects current working directory into Docker image.
 
 ### Release image
 To build and run release image simply use `docker-compose up`. Docker will download or build required images
