@@ -137,13 +137,21 @@ const data = await dokeBoss.bulk('preview', '*.jpg', '{name}.png', { width: 300,
 You can make remote convertation with rest api included in this package. Just run `node build/api.js` or `npm run serve` and add to invoke command:
 important notice: .after, custom and callback modules as well as site preview to pdf is not working in remote mode.
 
+Will throw error with message `remote is not available` in case api is not available (or timeout 1000 ms).
+
 ```typescript
+try {
 await getDoku()
         .setRemote(true)//also can be an url: https?://host:port. true mean will look in localhost:5001
         //.after and custom/callback modules is not applicable in remote mode yet
         .from(inputFile)
         .to(outputFile, { width: 300, height: 300 })
         .convert();
+} catch(e) {
+        if (e.message == 'remote is not available'){
+                //api is not started.
+        }
+}
 ```
 
 remote can be started with cli:

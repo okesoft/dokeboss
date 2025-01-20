@@ -338,9 +338,34 @@ export default class dokeBoss extends dokeBossBase {
 
             const url = new URL(remote);
             dokeBoss.remote = remote;
+            //we can not invoke doRemoteTestConnection here, because it async and will broke logic of chain invoking
             return dokeBoss;
         } catch (e) {
             throw new Error('remote is not valid, must be an url https?://host:port');
+        }
+    }
+
+    static async doRemoteTestConnection(): Promise<boolean> {
+        if (!dokeBoss.remote)
+            return false;
+
+        try {
+            let request = await axios.request({
+                method: 'get',
+                url: dokeBoss.remote + "/ping",
+                data: { ping: Number(Date.now() / 1000) },
+                timeout: 1000,
+                responseType: 'json'
+            });
+
+            return true;
+        } catch (e) {
+            //console.log(e.message, e.code);
+            if (e.code == "ECONNREFUSED" || e.code == "ECONNRESET" || e.code == "ENOTFOUND" || e.code == "ETIMEDOUT") {
+                throw new Error('remote is not available');
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -414,6 +439,7 @@ export default class dokeBoss extends dokeBossBase {
         await this.downloadFile();
 
         if (dokeBoss.remote) {
+            await dokeBoss.doRemoteTestConnection();
             return this.doRemote(Object.assign({}, this.getOptions(), options));
         }
 
@@ -431,6 +457,7 @@ export default class dokeBoss extends dokeBossBase {
         await this.downloadFile();
 
         if (dokeBoss.remote) {
+            await dokeBoss.doRemoteTestConnection();
             return this.doRemote(Object.assign({}, this.getOptions(), options));
         }
 
@@ -510,6 +537,7 @@ export default class dokeBoss extends dokeBossBase {
         await this.downloadFile();
 
         if (dokeBoss.remote) {
+            await dokeBoss.doRemoteTestConnection();
             return this.doRemoteCheck('isStreamable');
         }
 

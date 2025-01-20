@@ -113,6 +113,10 @@ export class dokeBossApi {
 
         });
 
+        this.app.get('/ping', async function (req, res, next) {
+            return res.json({ result: true });
+        });
+
         this.app.post('/check', async function (req, res, next) {
             console.log('request new check', req.body, req.files?.length)
 
