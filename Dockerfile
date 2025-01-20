@@ -2,8 +2,8 @@ FROM --platform=linux/amd64 node:20.15
 
 RUN apt-get update && \
     apt-get install -y git cmake make pkg-config x265 libtool build-essential \
-                       curl ffmpeg python3-pip python3-uno ghostscript libatk1.0-0 \
-                       libatk-bridge2.0-0 libxdamage1 && \
+    curl ffmpeg python3-pip python3-uno ghostscript libatk1.0-0 \
+    libatk-bridge2.0-0 libxdamage1 && \
     apt-get clean
 
 RUN python3 -mpip install unoserver --break-system-packages
@@ -70,7 +70,7 @@ RUN git clone --depth 1 --branch 7.1.1-43 https://github.com/ImageMagick/ImageMa
 
 RUN mkdir -p /app
 WORKDIR /app
-RUN git clone --depth 1 --branch 1.0.1 https://github.com/okesoft/dokeboss.git .
+RUN git clone --depth 1 --branch 1.0.2 https://github.com/okesoft/dokeboss.git .
 
 RUN npm install
 RUN npx puppeteer browsers install chrome
