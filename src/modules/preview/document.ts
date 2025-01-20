@@ -11,19 +11,23 @@ export default class dokeBossDocumentPreviewModule extends dokeBossModule {
 
     async preview(options: dokeBossOptionsExtended, mimeType: string): Promise<Buffer | dokeBossModuleCmdCallback> {
         const inputFile = this.prepareFile(this.bufferMimeType, this.buffer);
-
-        const outputPdfFile = this.prepareFile('application/pdf');
+        let outputPdfFile;
         const outputFile = this.prepareFile(mimeType);
 
-        try {
-            await spawn(
-                'unoconvert',
-                getConfig().GetUnoconvertCmdArgs(inputFile, outputPdfFile),
-            );
-        } catch (e) {
-            console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
-            this.error = e;
-            //throw new Error('can not preview document');
+        if (this.bufferMimeType != 'application/pdf') {
+            outputPdfFile = this.prepareFile('application/pdf');
+            try {
+                await spawn(
+                    'unoconvert',
+                    getConfig().GetUnoconvertCmdArgs(inputFile, outputPdfFile),
+                );
+            } catch (e) {
+                console.error('error while module ' + this.moduleName, e.stderr?.toString() ?? e.message);
+                this.error = e;
+                //throw new Error('can not preview document');
+            }
+        } else {
+            outputPdfFile = inputFile;
         }
 
         try {
