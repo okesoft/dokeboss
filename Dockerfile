@@ -70,7 +70,7 @@ RUN git clone --depth 1 --branch 7.1.1-43 https://github.com/ImageMagick/ImageMa
 
 RUN mkdir -p /app
 WORKDIR /app
-RUN git clone --depth 1 --branch 1.0.2 https://github.com/okesoft/dokeboss.git .
+RUN git clone --depth 1 --branch 1.0.3 https://github.com/okesoft/dokeboss.git .
 
 RUN npm install
 RUN npx puppeteer browsers install chrome
