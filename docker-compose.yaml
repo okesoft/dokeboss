@@ -26,6 +26,9 @@ services:
     depends_on:
       - unoserver
     restart: unless-stopped
+    environment:
+      - DOKEBOSS_API_HOST=0.0.0.0
+
 
 #  dokeboss-dev:
 #  # To run dokeboss-dev do the following:
